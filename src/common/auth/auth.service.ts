@@ -5,6 +5,7 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { Logger } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthHelper } from '../helpers/auth-helper';
@@ -12,6 +13,7 @@ import { AuthSession, AuthSessionKey } from '../../types/auth';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   redis: Redis;
   constructor(
     private readonly jwtService: JwtService,
@@ -32,13 +34,13 @@ export class AuthService {
       },
     });
     if (!account) {
-      console.log('======用户不存在，登录失败======', username);
+      this.logger.log({ username }, '用户不存在，登录失败');
       throw new UnauthorizedException('登录失败!');
     }
     if (await argon2.verify(account.password, pass)) {
       return account;
     } else {
-      console.log('======密码错误，登录失败======', username);
+      this.logger.log({ username }, '密码错误，登录失败');
       throw new UnauthorizedException('登录失败!');
     }
   }

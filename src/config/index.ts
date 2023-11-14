@@ -9,6 +9,7 @@ export default () => {
   const env = {
     appPort: process.env.APP_PORT || 6000,
     appInstance: process.env.APP_INSTANCE || 'App',
+    isProduction: process.env.NODE_ENV === 'production',
     appDeployment: process.env.APP_DEPLOYMENT,
     jwt: {
       secret: process.env.APP_JWT_SECRET,

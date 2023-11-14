@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 
 import { AppModule, bootstrap as runtimeBootstrap } from './common/app.module';
 
@@ -8,6 +9,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const apiPrefix = 'dmgjapi';
   app.setGlobalPrefix(apiPrefix);
+  const logger = app.get(Logger);
+  app.useLogger(logger);
   const configService = app.get(ConfigService);
 
   const config = new DocumentBuilder()
@@ -24,7 +27,7 @@ async function bootstrap() {
 
   const port = await configService.get('env.appPort');
   await app.listen(port);
-  console.log('=====app start at======', port);
+  logger.log(`app start at ${port}`);
 }
 if (runtimeBootstrap) {
   runtimeBootstrap();
