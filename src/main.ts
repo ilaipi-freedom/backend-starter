@@ -7,15 +7,14 @@ import { AppModule, bootstrap as runtimeBootstrap } from './common/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const apiPrefix = 'dmgjapi';
+  const apiPrefix = 'xxapi';
   app.setGlobalPrefix(apiPrefix);
   const logger = app.get(Logger);
   app.useLogger(logger);
   const configService = app.get(ConfigService);
 
   const config = new DocumentBuilder()
-    .setTitle('打码挂机 API')
-    .setDescription('全新开发，Admin 接口')
+    .setTitle('Backend Starter API')
     .setVersion('1.0')
     .addBearerAuth()
     .addTag(configService.get('env.appInstance'))
