@@ -1,7 +1,7 @@
 {
-  "name": "hongmu-backend",
+  "name": "backend-starter",
   "version": "0.0.1",
-  "description": "甘肃泓牧科技 仓储业务管理系统 后端",
+  "description": "nestjs + prisma， 支持多apps开发，非 monorepo",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
