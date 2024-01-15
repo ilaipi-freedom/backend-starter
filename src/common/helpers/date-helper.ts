@@ -1,3 +1,4 @@
+import { addDays } from 'date-fns';
 import { format, formatInTimeZone, zonedTimeToUtc } from 'date-fns-tz';
 
 export const timeZone = 'Asia/Shanghai';
@@ -12,3 +13,14 @@ export const fmtBy = (date: Date, fmt: string) =>
 
 export const utc = (date: string, tz?: string) =>
   date ? zonedTimeToUtc(date, tz || timeZone) : null;
+
+export const dateWhereAnd = (date: string[], field = 'date') => {
+  if (!date?.length) {
+    return undefined;
+  }
+  if (date[0] && date[1]) {
+    const date0 = utc(date[0]);
+    const date1 = addDays(utc(date[1]), 1);
+    return [{ [field]: { gte: date0 } }, { [field]: { lt: date1 } }];
+  }
+};
