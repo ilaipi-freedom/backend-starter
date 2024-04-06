@@ -12,7 +12,12 @@ export default () => {
     isProduction: process.env.NODE_ENV === 'production',
     appDeployment: process.env.APP_DEPLOYMENT,
     jwt: {
-      secret: process.env.APP_JWT_SECRET,
+      Admin: {
+        secret: process.env.Admin_JWT_SECRET,
+        signOptions: {
+          expiresIn: '1w',
+        },
+      },
     },
     redis,
     cache: {

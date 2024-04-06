@@ -12,7 +12,9 @@ const JWT_SECRET = {
   provide: 'APP_JWT_SECRET',
   imports: [ConfigModule],
   useFactory: async (service: ConfigService) => {
-    const secret = await service.get('env.jwt.secret');
+    const app = await service.get('env.appInstance');
+    const result = await service.get(`env.jwt.${app}`);
+    const { secret } = result;
     return secret;
   },
   inject: [ConfigService],
@@ -25,10 +27,12 @@ const JWT_SECRET = {
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (service: ConfigService) => {
-        const secret = await service.get('env.jwt.secret');
+        const app = await service.get('env.appInstance');
+        const result = await service.get(`env.jwt.${app}`);
+        const { secret, signOptions } = result;
         return {
           secret,
-          signOptions: { expiresIn: '1w' },
+          signOptions,
         };
       },
       inject: [ConfigService],
