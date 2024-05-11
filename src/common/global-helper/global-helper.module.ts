@@ -6,6 +6,7 @@ import Redis from 'ioredis';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
 import config from '../../config/';
 import { REDIS_CLIENT } from 'src/types/global';
+import { GlobalHelperService } from './global-helper.service';
 
 const redisClient = {
   provide: REDIS_CLIENT,
@@ -56,7 +57,7 @@ const redisClient = {
       },
     }),
   ],
-  providers: [redisClient],
+  providers: [redisClient, GlobalHelperService],
   exports: [redisClient],
 })
 export class GlobalHelperModule {}
