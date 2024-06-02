@@ -28,7 +28,7 @@ const JWT_SECRET = {
         const app = await service.get('env.appInstance');
         const secret = await service.get(`env.jwt.secret`);
         const result = await service.get(`env.jwt.${app}`);
-        const { signOptions } = result;
+        const { signOptions } = result || {};
         return {
           secret,
           signOptions,
