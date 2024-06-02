@@ -1,19 +1,44 @@
+import { createServer } from 'net';
+
+import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from 'nestjs-pino';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { AdminApiModule } from 'src/apps/admin/admin.module';
-import { AppInstanceEnum } from '../types/helper';
-import { CliModule } from 'src/apps/cli/cli.module';
-import cliBootstrap from 'src/apps/cli/main';
+const serverBootstrap = async (mo: any) => {
+  const app = await NestFactory.create(mo);
+  const configService = app.get(ConfigService);
+  const appInstance = configService.get('env.appInstance');
+  const { appPort, apiPrefix } = configService.get('env.bootstrap');
+  app.setGlobalPrefix(apiPrefix);
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
-const getRuntimeModule = () => {
-  switch (process.env.APP_INSTANCE) {
-    case AppInstanceEnum.ADMIN:
-      return { module: AdminApiModule };
-    case AppInstanceEnum.CLI:
-      return { module: CliModule, bootstrap: cliBootstrap };
-    default:
-      return { bootstrap: () => console.log('custom bootstrap') };
-  }
+  const config = new DocumentBuilder()
+    .setTitle('Backend API')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag(appInstance)
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(`${apiPrefix}/apidocs`, app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
+
+  await app.listen(appPort);
+  logger.log(`${appInstance} start at ${appPort}`);
+};
+
+const cliBootstrap = async (mo: any) => {
+  const app = await NestFactory.createApplicationContext(mo);
+  await app.init();
+  const configService = app.get(ConfigService);
+  const appInstance = configService.get('env.appInstance');
+  const logger = app.get(Logger);
+  app.useLogger(logger);
+  logger.log(`${appInstance} app start`);
+  // keep alive
+  createServer().listen();
 };
 
 const isProd = (config: ConfigService) => {
@@ -21,4 +46,4 @@ const isProd = (config: ConfigService) => {
   return deployment === 'prod';
 };
 
-export { getRuntimeModule, isProd };
+export { isProd, serverBootstrap, cliBootstrap };

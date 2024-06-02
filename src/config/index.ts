@@ -7,13 +7,17 @@ export default () => {
     ...(redisPass ? { password: redisPass } : {}),
   };
   const appInstance = process.env.APP_INSTANCE || 'App';
-  const appPortKey = `${appInstance.toUpperCase()}_APP_PORT`;
-  const appJwtSecret = `${appInstance.toUpperCase()}_JWT_SECRET`;
+  const prefix = appInstance.toUpperCase();
+  const appPortKey = `${prefix}_APP_PORT`;
+  const appJwtSecret = `${prefix}_JWT_SECRET`;
   const env = {
-    appPort: process.env[appPortKey] || 6000,
     appInstance,
     isProduction: process.env.NODE_ENV === 'production',
     appDeployment: process.env.APP_DEPLOYMENT,
+    bootstrap: {
+      appPort: process.env[appPortKey] || 6000,
+      apiPrefix: process.env[`${prefix}_API_PREFIX`] || '',
+    },
     jwt: {
       secret: process.env[appJwtSecret],
       Admin: {

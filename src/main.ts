@@ -1,35 +1,16 @@
-import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Logger } from 'nestjs-pino';
+import { AppInstanceEnum } from './types/helper';
+import { serverBootstrap, cliBootstrap } from './utils/app.helper';
+import { AdminApiModule } from 'src/apps/admin/admin.module';
+import { CliModule } from 'src/apps/cli/cli.module';
 
-import { AppModule, bootstrap as runtimeBootstrap } from './common/app.module';
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const apiPrefix = 'xxapi';
-  app.setGlobalPrefix(apiPrefix);
-  const logger = app.get(Logger);
-  app.useLogger(logger);
-  const configService = app.get(ConfigService);
-
-  const config = new DocumentBuilder()
-    .setTitle('Backend Starter API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .addTag(configService.get('env.appInstance'))
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(`${apiPrefix}/apidocs`, app, document, {
-    swaggerOptions: { persistAuthorization: true },
-  });
-
-  const port = await configService.get('env.appPort');
-  await app.listen(port);
-  logger.log(`app start at ${port}`);
-}
-if (runtimeBootstrap) {
-  runtimeBootstrap();
-} else {
-  bootstrap();
+switch (process.env.APP_INSTANCE) {
+  case AppInstanceEnum.ADMIN:
+    serverBootstrap(AdminApiModule);
+    break;
+  case AppInstanceEnum.CLI:
+    cliBootstrap(CliModule);
+    break;
+  default:
+    console.log('Unsupported app, please check: #types/helper#AppInstanceEnum');
+    break;
 }
