@@ -12,9 +12,7 @@ const JWT_SECRET = {
   provide: 'APP_JWT_SECRET',
   imports: [ConfigModule],
   useFactory: async (service: ConfigService) => {
-    const app = await service.get('env.appInstance');
-    const result = await service.get(`env.jwt.${app}`);
-    const { secret } = result;
+    const secret = await service.get(`env.jwt.secret`);
     return secret;
   },
   inject: [ConfigService],
@@ -28,8 +26,9 @@ const JWT_SECRET = {
       imports: [ConfigModule],
       useFactory: async (service: ConfigService) => {
         const app = await service.get('env.appInstance');
+        const secret = await service.get(`env.jwt.secret`);
         const result = await service.get(`env.jwt.${app}`);
-        const { secret, signOptions } = result;
+        const { signOptions } = result;
         return {
           secret,
           signOptions,
@@ -40,6 +39,6 @@ const JWT_SECRET = {
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthGuard, JWT_SECRET, JwtStrategy],
-  exports: [AuthService, JwtAuthGuard, JwtModule],
+  exports: [AuthService, JwtAuthGuard, JWT_SECRET, JwtModule],
 })
 export class AuthModule {}
