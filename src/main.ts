@@ -1,5 +1,5 @@
-import { AppInstanceEnum } from './types/helper';
-import { serverBootstrap, cliBootstrap } from './utils/app.helper';
+import { AppInstanceEnum } from 'src/types/helper';
+import { serverBootstrap, cliBootstrap } from 'src/utils/app.helper';
 import { AdminApiModule } from 'src/apps/admin/admin.module';
 import { CliModule } from 'src/apps/cli/cli.module';
 
