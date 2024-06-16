@@ -1,0 +1,61 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "your_branch" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Login to Huawei Docker Hub
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ secrets.DOCKER_REGISTRY }}
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_HUB_SPACE }}/${{ vars.DOCKER_IMAGE_NAME }}:latest
+
+    - name: executing remote ssh commands using ssh key
+      uses: appleboy/ssh-action@v1.0.0
+      env:
+        INPUT_DOCKER_CONTAINER_NAME: ${{ vars.DOCKER_CONTAINER_NAME }}
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        allenvs: true
+        script: |
+          echo -n "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin ${{ secrets.DOCKER_REGISTRY }}
+          docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_HUB_SPACE }}/${{ vars.DOCKER_IMAGE_NAME }}
+
+          APP_INSTANCE=("Dwz" "Admin" "H5")
+          APP_PORT=("38101" "38102" "38103")
+
+          for ((i=0; i<${#APP_INSTANCE[@]}; i++))
+          do
+            if [ "$(docker ps -aq -f name=${INPUT_DOCKER_CONTAINER_NAME}_${APP_INSTANCE[$i]})" ]; then
+              docker rm -f ${INPUT_DOCKER_CONTAINER_NAME}_${APP_INSTANCE[$i]}
+            fi
+
+            docker run -dit --restart always --network zxyh-h5 \
+              -v /home/zxyh/applog/${APP_INSTANCE[$i]}:/data/log \
+              --name ${INPUT_DOCKER_CONTAINER_NAME}_${APP_INSTANCE[$i]} \
+              --env-file /home/ubuntu/yx-backend/prod.env \
+              -e APP_INSTANCE=${APP_INSTANCE[$i]} \
+              -p ${APP_PORT[$i]}:6000 \
+              ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_HUB_SPACE }}/${{ vars.DOCKER_IMAGE_NAME }}
+          done
