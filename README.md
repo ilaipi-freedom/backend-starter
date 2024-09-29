@@ -8,7 +8,11 @@ cp env.example .env
 
 ## dev
 
-本地开发的时候，如果是Windows，可以在终端中执行： `$env:APP_INSTANCE="Dwz"`
+本地开发的时候，如果是Windows，可以在终端中执行： 
+
+```
+$env:APP_INSTANCE="Dwz"
+```
 
 在当前窗口，启动的就是 `Dwz` app。
 
