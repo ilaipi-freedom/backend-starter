@@ -6,10 +6,12 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { Logger } from '@nestjs/common';
+import { subMinutes } from 'date-fns';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthHelper } from '../helpers/auth-helper';
 import { AuthSession, AuthSessionKey } from '../../types/auth';
+import NP from '../helpers/number-helper';
 
 @Injectable()
 export class AuthService {
@@ -51,6 +53,11 @@ export class AuthService {
     const payload = { id: account.id, key: 'AUTH', type };
     const sessionKey = AuthHelper.sessionKey(payload);
     const token = await this.jwtService.signAsync(payload);
+    // token的过期时间，比当前时间会早一点点
+    // 为了保证token过期前，缓存不会丢失，计算过期时间的时候，留一分钟冗余时间
+    const now = subMinutes(Date.now(), 1).getTime();
+    const tokenVerified = await this.jwtService.verifyAsync(token);
+    const ttl = NP.minus(tokenVerified.exp * 1000, now).toFixed(0);
     const sessionParam = {
       id: account.id,
       type,
@@ -58,7 +65,11 @@ export class AuthService {
       token,
       role: account.role.perm,
     };
-    await this.cacheManager.set(sessionKey, JSON.stringify(sessionParam), 0);
+    await this.cacheManager.set(
+      sessionKey,
+      JSON.stringify(sessionParam),
+      Number(ttl),
+    );
     return {
       id: account.id,
       role: account.role.perm,

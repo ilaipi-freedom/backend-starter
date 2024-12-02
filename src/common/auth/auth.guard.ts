@@ -19,19 +19,33 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
+    if (isPublic) {
+      return true;
+    }
     try {
       const canActivate = (await super.canActivate(context)) as boolean;
       return canActivate;
     } catch (err) {
-      if (isPublic) {
-        return true;
+      if (err.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token has expired');
       }
-      return false;
+      if (err.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token');
+      }
+      if (err.message === 'No auth token') {
+        throw new UnauthorizedException('No token provided');
+      }
+      throw err;
     }
   }
 
-  handleRequest(err: any, user: any) {
+  handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
+      if (info && info.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token has expired');
+      } else if (info && info.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token');
+      }
       throw err || new UnauthorizedException();
     }
     return user;
