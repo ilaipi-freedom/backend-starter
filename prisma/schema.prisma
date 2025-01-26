@@ -49,6 +49,7 @@ model SysDict {
 model SysDictData {
   id        Int             @id @default(autoincrement())
   sort      Float?
+  key String
   label     String
   value     String
   type      String

@@ -1,27 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { AvailableStatus } from '@prisma/client';
+import { AvailableStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
 @Injectable()
 export class SysDictHelperService {
   constructor(private readonly prisma: PrismaService) {}
-  async getTypeValues(type: string) {
-    return this.prisma.sysDictData.findMany({
-      where: { type, status: AvailableStatus.normal },
-      orderBy: { sort: 'asc' },
-    });
+
+  whereByTypeAndKey(corpId: string, type: string, key: string) {
+    return {
+      type,
+      ...(key ? { key } : {}),
+      status: AvailableStatus.normal,
+      corpId,
+    };
   }
-  async getSingleData(type: string) {
-    return this.prisma.sysDictData.findFirst({
-      where: { type, status: AvailableStatus.normal },
+
+  async getListByTypeAndKey(corpId: string, type: string, key: string) {
+    const where: Prisma.SysDictDataWhereInput = this.whereByTypeAndKey(
+      corpId,
+      type,
+      key,
+    );
+    return this.prisma.sysDictData.findMany({
+      where,
       orderBy: { sort: 'asc' },
     });
   }
 
-  async getByTypeAndValue(type: string, value: string) {
+  async getByTypeAndKey(corpId: string, type: string, key: string) {
+    const where: Prisma.SysDictDataWhereInput = this.whereByTypeAndKey(
+      corpId,
+      type,
+      key,
+    );
     return this.prisma.sysDictData.findFirst({
-      where: { type, value, status: AvailableStatus.normal },
+      where,
       orderBy: { sort: 'asc' },
     });
   }
