@@ -11,10 +11,10 @@ cp env.example .env
 本地开发的时候，如果是Windows，可以在终端中执行： 
 
 ```
-$env:APP_INSTANCE="Dwz"
+$env:APP_INSTANCE="Admin"
 ```
 
-在当前窗口，启动的就是 `Dwz` app。
+在当前窗口，启动的就是 `Admin` app。
 
 开多个窗口，通过指定不同的APP_INSTANCE，可以同时启动多个app。
 
