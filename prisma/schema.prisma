@@ -7,21 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// 企业
+model Corporation {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  remark      String?
+  status      AvailableStatus @default(normal)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
+  roles       Role[]
+  accounts    Account[]
+  sysDicts    SysDict[]
+  sysDictDataList SysDictData[]
+}
+
 /// 用户角色
 model Role {
-  id        String          @id @default(cuid())
-  name      String // 角色名称
-  perm      String          @unique() // 权限字符 唯一
-  route     String? // 默认路由
-  status    AvailableStatus @default(normal)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @default(now()) @updatedAt
-  accounts   Account[]
+  id             String           @id @default(cuid())
+  corpId         String
+  name           String // 角色名称
+  perm           String           @unique() // 权限字符 唯一
+  route          String? // 默认路由
+  status         AvailableStatus  @default(normal)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  accounts       Account[]
+  corp           Corporation      @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  RoleMenuConfig RoleMenuConfig[]
 }
 
 /// 用户
 model Account {
   id        String          @id @default(cuid())
+  corpId    String
   roleId    String
   status    AvailableStatus @default(normal)
   name      String
@@ -31,11 +49,46 @@ model Account {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
   role      Role            @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  corp      Corporation     @relation(fields: [corpId], references: [id], onDelete: Cascade)
+}
+
+/// 菜单
+model SysMenu {
+  id           String          @id @default(cuid())
+  name         String // 路由名称，必须设置且唯一
+  permission   String          @unique // 权限标识，用于角色权限配置
+  component    String? // 组件路径
+  path         String // URL 路径
+  redirect     String? // 重定向地址
+  alias        String? // 路由别名
+  meta         Json? // 元数据，包含 title、icon、orderNo 等信息
+  parentMenuId String?
+  status       AvailableStatus @default(normal)
+  type         SysMenuType
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @default(now()) @updatedAt
+
+  parentMenu      SysMenu?         @relation("SysMenu_parent_SysMenu", fields: [parentMenuId], references: [id], onDelete: Cascade)
+  children        SysMenu[]        @relation("SysMenu_parent_SysMenu")
+  roleMenuConfigs RoleMenuConfig[]
+}
+
+/// 角色菜单配置
+model RoleMenuConfig {
+  id          String   @id @default(cuid())
+  roleId      String
+  sysMenuPerm String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  role    Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  sysMenu SysMenu @relation(fields: [sysMenuPerm], references: [permission], onDelete: Cascade)
 }
 
 /// 系统字典
 model SysDict {
-  id        String             @id @default(cuid())
+  id        String          @id @default(cuid())
+  corpId    String
   category  SysDictCategory @default(select)
   name      String
   type      String          @unique
@@ -45,13 +98,15 @@ model SysDict {
   updatedAt DateTime        @default(now()) @updatedAt
 
   sysDictDataList SysDictData[]
+  corp            Corporation   @relation(fields: [corpId], references: [id], onDelete: Cascade)
 }
 
 /// 系统字典数据
 model SysDictData {
-  id        String             @id @default(cuid())
+  id        String          @id @default(cuid())
+  corpId    String
   sort      Float?
-  key String
+  key       String
   label     String
   value     String
   type      String
@@ -62,7 +117,8 @@ model SysDictData {
   updatedAt DateTime        @default(now()) @updatedAt
 
   /// 关联字典
-  sysDict   SysDict @relation(fields: [type], references: [type], onDelete: Cascade)
+  sysDict SysDict     @relation(fields: [type], references: [type], onDelete: Cascade)
+  corp    Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
 }
 
 /// 可用状态
@@ -74,4 +130,10 @@ enum AvailableStatus {
 enum SysDictCategory {
   radio
   select
+}
+
+enum SysMenuType {
+  CATALOG // 目录
+  MENU // 菜单
+  BUTTON // 按钮
 }
