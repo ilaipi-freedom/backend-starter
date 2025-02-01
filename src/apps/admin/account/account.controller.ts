@@ -3,6 +3,7 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 import { CurrentUser } from 'src/common/helpers/current-user';
 import { AuthSession } from 'src/types/auth';
+
 import { AccountService } from './account.service';
 
 @ApiTags('账号')

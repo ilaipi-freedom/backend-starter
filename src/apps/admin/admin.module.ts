@@ -1,15 +1,23 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 
-import { AccountModule } from './account/account.module';
-import { GlobalHelperModule } from 'src/common/global-helper/global-helper.module';
+import { JwtAuthGuard } from 'src/common/auth/auth.guard';
 import { AuthModule } from 'src/common/auth/auth.module';
 import { CacheModule } from 'src/common/cache/cache.module';
+import { GlobalHelperModule } from 'src/common/global-helper/global-helper.module';
 import { HttpExceptionFilter } from 'src/common/helpers/http-exception.filter';
-import { JwtAuthGuard } from 'src/common/auth/auth.guard';
+
+import { AccountModule } from './account/account.module';
+import { SysMenuModule } from './sys-menu/sys-menu.module';
 
 @Module({
-  imports: [AccountModule, GlobalHelperModule, AuthModule, CacheModule],
+  imports: [
+    AccountModule,
+    GlobalHelperModule,
+    AuthModule,
+    CacheModule,
+    SysMenuModule,
+  ],
   providers: [
     {
       provide: APP_FILTER,

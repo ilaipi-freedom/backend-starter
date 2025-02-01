@@ -1,9 +1,9 @@
 import { createServer } from 'net';
 
-import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from 'nestjs-pino';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 
 const serverBootstrap = async (mo: any) => {
   const app = await NestFactory.create(mo);

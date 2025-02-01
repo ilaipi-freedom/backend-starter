@@ -6,11 +6,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { LoginDto, LoginResponseDto } from './dto';
 import { AuthService } from './auth.service';
-import { Public } from '../helpers/public';
-import { CurrentUser } from '../helpers/current-user';
+import { LoginDto, LoginResponseDto } from './dto';
 import { AuthSession } from '../../types/auth';
+import { CurrentUser } from '../helpers/current-user';
+import { Public } from '../helpers/public';
 
 @Controller('auth')
 @ApiTags('认证')

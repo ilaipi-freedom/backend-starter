@@ -1,17 +1,17 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import * as argon2 from 'argon2';
-import { JwtService } from '@nestjs/jwt';
-import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import * as argon2 from 'argon2';
+import { Cache } from 'cache-manager';
 import { subMinutes } from 'date-fns';
+import Redis from 'ioredis';
 
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthHelper } from '../helpers/auth-helper';
 import { AuthSession, AuthSessionKey } from '../../types/auth';
+import { AuthHelper } from '../helpers/auth-helper';
 import NP from '../helpers/number-helper';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {

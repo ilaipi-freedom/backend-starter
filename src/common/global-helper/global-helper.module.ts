@@ -1,12 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { LoggerModule } from 'nestjs-pino';
 import Redis from 'ioredis';
+import { LoggerModule } from 'nestjs-pino';
 
 import { PrismaModule } from 'src/common/prisma/prisma.module';
-import config from '../../config/';
 import { REDIS_CLIENT } from 'src/types/global';
+
 import { GlobalHelperService } from './global-helper.service';
+import config from '../../config/';
 
 const redisClient = {
   provide: REDIS_CLIENT,
