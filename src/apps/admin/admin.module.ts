@@ -8,6 +8,7 @@ import { GlobalHelperModule } from 'src/common/global-helper/global-helper.modul
 import { HttpExceptionFilter } from 'src/common/helpers/http-exception.filter';
 
 import { AccountModule } from './account/account.module';
+import { DeptModule } from './dept/dept.module';
 import { SysMenuModule } from './sys-menu/sys-menu.module';
 
 @Module({
@@ -17,6 +18,7 @@ import { SysMenuModule } from './sys-menu/sys-menu.module';
     AuthModule,
     CacheModule,
     SysMenuModule,
+    DeptModule,
   ],
   providers: [
     {

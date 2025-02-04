@@ -19,6 +19,23 @@ model Corporation {
   accounts    Account[]
   sysDicts    SysDict[]
   sysDictDataList SysDictData[]
+  depts       Dept[]
+}
+
+model Dept {
+  id        String          @id @default(cuid())
+  corpId    String
+  name      String
+  parentDeptId String?
+  remark    String?
+  status    AvailableStatus @default(normal)
+  sort      Float?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+
+  parentDept      Dept?         @relation("Dept_parent_Dept", fields: [parentDeptId], references: [id], onDelete: Cascade)
+  children        Dept[]        @relation("Dept_parent_Dept")
+  corp            Corporation   @relation(fields: [corpId], references: [id], onDelete: Cascade)
 }
 
 /// 用户角色

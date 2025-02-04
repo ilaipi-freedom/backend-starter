@@ -19,41 +19,41 @@ import { SysMenuService } from './sys-menu.service';
 @ApiBearerAuth()
 @Controller('sys-menu')
 export class SysMenuController {
-  constructor(private readonly sysMenuService: SysMenuService) {}
+  constructor(private readonly service: SysMenuService) {}
 
   @Post()
   @ApiOperation({ summary: '创建菜单' })
   create(@Body() createMenuDto: CreateMenuDto) {
-    return this.sysMenuService.create(createMenuDto);
+    return this.service.create(createMenuDto);
   }
 
   @Get('tree')
   @ApiOperation({ summary: '获取完整菜单树' })
   findAllMenuTree() {
-    return this.sysMenuService.findAllMenuTree();
+    return this.service.findAllMenuTree();
   }
 
   @Get('user-tree')
   @ApiOperation({ summary: '获取当前用户的菜单树' })
   findUserMenuTree(@CurrentUser() user: AuthSession) {
-    return this.sysMenuService.findUserMenuTree(user.id);
+    return this.service.findUserMenuTree(user.id);
   }
 
   @Get(':id')
   @ApiOperation({ summary: '获取菜单详情' })
   findOne(@Param('id') id: string) {
-    return this.sysMenuService.findOne(id);
+    return this.service.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: '更新菜单' })
   update(@Param('id') id: string, @Body() updateMenuDto: CreateMenuDto) {
-    return this.sysMenuService.update(id, updateMenuDto);
+    return this.service.update(id, updateMenuDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: '删除菜单' })
   remove(@Param('id') id: string) {
-    return this.sysMenuService.remove(id);
+    return this.service.remove(id);
   }
 }

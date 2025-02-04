@@ -9,10 +9,13 @@ export class AuthHelper {
    */
   static sessionKey(payload: AuthSessionKey) {
     const keys = [payload.type, payload.key, payload.id.toString()];
-    return keys.join('::');
+    return keys.join(':');
   }
 
-  static isAdmin(user: AuthSession) {
-    return user.role === '1';
+  /**
+   * 是否是超级管理员
+   */
+  static isSuper(user: AuthSession) {
+    return user.role === 'super';
   }
 }

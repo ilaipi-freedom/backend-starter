@@ -64,6 +64,7 @@ export class AuthService {
       username: account.username,
       token,
       role: account.role.perm,
+      corpId: account.corpId,
     };
     await this.cacheManager.set(
       sessionKey,
