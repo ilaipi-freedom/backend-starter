@@ -6,12 +6,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -39,8 +41,9 @@ export class DeptController {
 
   @Get()
   @ApiOperation({ summary: '获取部门列表' })
-  findAll(@CurrentUser() user: AuthSession) {
-    return this.service.findAll(user);
+  @ApiQuery({ name: 'q', description: '搜索关键字', required: false })
+  findAll(@CurrentUser() user: AuthSession, @Query('q') q?: string) {
+    return this.service.findAll(user, q);
   }
 
   @Get('tree')

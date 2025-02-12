@@ -42,20 +42,8 @@ jobs:
           echo -n "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin ${{ secrets.DOCKER_REGISTRY }}
           docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_HUB_SPACE }}/${{ vars.DOCKER_IMAGE_NAME }}
 
-          APP_INSTANCE=("Dwz" "Admin" "H5")
-          APP_PORT=("38101" "38102" "38103")
+          cd /path/to/compose
+          docker compose up -d backend
 
-          for ((i=0; i<${#APP_INSTANCE[@]}; i++))
-          do
-            if [ "$(docker ps -aq -f name=${INPUT_DOCKER_CONTAINER_NAME}_${APP_INSTANCE[$i]})" ]; then
-              docker rm -f ${INPUT_DOCKER_CONTAINER_NAME}_${APP_INSTANCE[$i]}
-            fi
-
-            docker run -dit --restart always --network zxyh-h5 \
-              -v /home/zxyh/applog/${APP_INSTANCE[$i]}:/data/log \
-              --name ${INPUT_DOCKER_CONTAINER_NAME}_${APP_INSTANCE[$i]} \
-              --env-file /home/ubuntu/yx-backend/prod.env \
-              -e APP_INSTANCE=${APP_INSTANCE[$i]} \
-              -p ${APP_PORT[$i]}:6000 \
-              ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_HUB_SPACE }}/${{ vars.DOCKER_IMAGE_NAME }}
-          done
+          docker compose down nginx
+          docker compose up -d nginx

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AvailableStatus, Dept } from '@prisma/client';
+import { Dept } from '@prisma/client';
 
 import { fmtBy } from 'src/common/helpers/date-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
@@ -43,19 +43,55 @@ export class DeptService {
     });
   }
 
-  async findAll(user: AuthSession) {
-    const depts = await this.prisma.dept.findMany({
+  async findAll(user: AuthSession, q?: string) {
+    // 一次性获取该企业的所有部门
+    const allCorpDepts = await this.prisma.dept.findMany({
       where: {
         corpId: user.corpId,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
     });
-    return depts.map((dept) => ({
-      ...dept,
-      createdAt: fmtBy(dept.createdAt, 'yyyy-MM-dd HH:mm:ss'),
-    }));
+
+    // 如果没有搜索条件，直接返回所有部门
+    if (!q) {
+      return allCorpDepts.map((dept) => ({
+        ...dept,
+        createdAt: fmtBy(dept.createdAt, 'yyyy-MM-dd HH:mm:ss'),
+      }));
+    }
+
+    // 构建部门 ID 映射，方便快速查找
+    const deptMap = new Map(allCorpDepts.map((dept) => [dept.id, dept]));
+
+    // 找出名称匹配的部门
+    const matchedDepts = allCorpDepts.filter((dept) => dept.name.includes(q));
+    const matchedDeptIds = new Set(matchedDepts.map((d) => d.id));
+
+    // 收集所有匹配部门的父级部门
+    const parentDeptIds = new Set<string>();
+    for (const dept of matchedDepts) {
+      let currentParentId = dept.parentDeptId;
+      while (currentParentId) {
+        parentDeptIds.add(currentParentId);
+        const parentDept = deptMap.get(currentParentId);
+        currentParentId = parentDept?.parentDeptId || null;
+      }
+    }
+
+    // 合并匹配的部门和父级部门
+    const resultDepts = [
+      ...matchedDepts,
+      ...Array.from(parentDeptIds)
+        .map((id) => deptMap.get(id)!)
+        .filter((dept) => !matchedDeptIds.has(dept.id)),
+    ];
+
+    return resultDepts
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((dept) => ({
+        ...dept,
+        createdAt: fmtBy(dept.createdAt, 'yyyy-MM-dd HH:mm:ss'),
+        isMatched: matchedDeptIds.has(dept.id),
+      }));
   }
 
   async findDeptTree(user: AuthSession) {
