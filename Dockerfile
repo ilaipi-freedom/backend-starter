@@ -34,7 +34,7 @@ COPY --from=prod /app/node_modules /app/node_modules/
 COPY --from=build /app/node_modules/.prisma/ /app/node_modules/.prisma/
 COPY package.json ./
 COPY prisma ./prisma/
-COPY --from=build /app/dist /app/dist/
+COPY --from=build /app/dist_obfuscated /app/dist/
 
 ENTRYPOINT ["node"]
 
