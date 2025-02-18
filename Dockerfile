@@ -24,7 +24,7 @@ RUN npm install
 FROM dev as build
 COPY . ./
 RUN npx prisma generate
-RUN npm run build
+RUN npm run build:obfuscate
 
 FROM base as release
 
@@ -34,7 +34,7 @@ COPY --from=prod /app/node_modules /app/node_modules/
 COPY --from=build /app/node_modules/.prisma/ /app/node_modules/.prisma/
 COPY package.json ./
 COPY prisma ./prisma/
-COPY --from=build /app/dist /app/dist/
+COPY --from=build /app/dist2 /app/dist/
 
 ENTRYPOINT ["node"]
 
