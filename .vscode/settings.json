@@ -15,10 +15,10 @@
     "less.validate": false,
     "scss.validate": false,
     "[shellscript]": {
-      "editor.defaultFormatter": "foxundermoon.shell-format"
+      "editor.defaultFormatter": "trae.ai-code-completion"
     },
     "[dotenv]": {
-      "editor.defaultFormatter": "foxundermoon.shell-format"
+      "editor.defaultFormatter": "trae.ai-code-completion"
     },
     "[typescript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
