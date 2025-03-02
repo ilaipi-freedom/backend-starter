@@ -1,10 +1,6 @@
 export default () => {
-  const redisPass = process.env.REDIS_PASS;
   const redis = {
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: process.env.REDIS_PORT || 6379,
-    db: process.env.REDIS_DB || 0,
-    ...(redisPass ? { password: redisPass } : {}),
+    url: process.env.REDIS_URL,
   };
   const appInstance = process.env.APP_INSTANCE || 'App';
   const prefix = appInstance.toUpperCase();
@@ -28,7 +24,6 @@ export default () => {
     },
     redis,
     cache: {
-      ...redis,
       ttl: 60000, // 默认缓存1分钟
     },
   };

@@ -6,7 +6,7 @@ import { AuthController } from './auth.controller';
 import { JwtAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
-import { CacheModule } from '../cache/cache.module';
+import { CacheHelperModule } from '../cache-helper/cache-helper.module';
 
 const JWT_SECRET = {
   provide: 'APP_JWT_SECRET',
@@ -21,7 +21,7 @@ const JWT_SECRET = {
 @Module({
   imports: [
     ConfigModule,
-    CacheModule,
+    CacheHelperModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (service: ConfigService) => {

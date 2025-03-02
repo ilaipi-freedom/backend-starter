@@ -2,17 +2,25 @@ import { createServer } from 'net';
 
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
+import * as bodyParser from 'body-parser';
 
 const serverBootstrap = async (mo: any) => {
-  const app = await NestFactory.create(mo);
+  const app = await NestFactory.create<NestExpressApplication>(mo);
+  app.set('query parser', 'extended');
   const configService = app.get(ConfigService);
   const appInstance = configService.get('env.appInstance');
   const { appPort, apiPrefix } = configService.get('env.bootstrap');
   app.setGlobalPrefix(apiPrefix);
   const logger = app.get(Logger);
   app.useLogger(logger);
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+  app.use(bodyParser.json({ limit: '20mb' }));
+  app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
 
   const config = new DocumentBuilder()
     .setTitle('Backend API')

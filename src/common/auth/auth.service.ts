@@ -6,7 +6,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { Cache } from 'cache-manager';
 import { subMinutes } from 'date-fns';
-import Redis from 'ioredis';
 
 import { AuthSession, AuthSessionKey } from '../../types/auth';
 import { AuthHelper } from '../helpers/auth-helper';
@@ -16,15 +15,12 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  redis: Redis;
   constructor(
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-  ) {
-    this.redis = new Redis(configService.get('env.redis'));
-  }
+  ) {}
 
   async verifyAccount(username: string, pass: string) {
     const account = await this.prisma.account.findUnique({

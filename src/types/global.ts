@@ -1,1 +1,0 @@
-export const REDIS_CLIENT = 'GLOBAL:REDIS_CLIENT';
