@@ -1,11 +1,30 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { createKeyv } from '@keyv/redis';
 
 import { PrismaModule } from 'src/common/prisma/prisma.module';
+import { KEYV_GLOBAL_KEY } from 'src/types/global';
 
-import { GlobalHelperService } from './global-helper.service';
 import config from '../../config/';
+import { GlobalHelperService } from './global-helper.service';
+
+const keyvProvider = {
+  provide: KEYV_GLOBAL_KEY,
+  useFactory: (configService: ConfigService) => {
+    const redisUrl = configService.get('env.redis.url');
+    const keyv = createKeyv({
+      url: redisUrl,
+      pingInterval: 3000,
+      socket: {
+        connectTimeout: 10000,
+        keepAlive: 5000,
+      },
+    });
+    return keyv;
+  },
+  inject: [ConfigService],
+};
 
 @Global()
 @Module({
@@ -47,6 +66,7 @@ import config from '../../config/';
       },
     }),
   ],
-  providers: [GlobalHelperService],
+  providers: [GlobalHelperService, keyvProvider],
+  exports: [keyvProvider],
 })
 export class GlobalHelperModule {}

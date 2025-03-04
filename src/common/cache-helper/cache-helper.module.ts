@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Keyv } from 'keyv';
-import KeyvRedis from '@keyv/redis';
+
+import { KEYV_GLOBAL_KEY } from 'src/types/global';
 
 import { CacheHelperService } from './cache-helper.service';
 
@@ -10,16 +11,18 @@ import { CacheHelperService } from './cache-helper.service';
   imports: [
     CacheModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        stores: [
-          new Keyv({
-            store: new KeyvRedis(configService.get('env.redis.url')),
-          }),
-        ],
-        isGlobal: true,
-        ...configService.get('env.cache'),
-      }),
-      inject: [ConfigService],
+      useFactory: async (keyv: Keyv, configService: ConfigService) => {
+        await keyv.store.client.connect();
+
+        const cacheConfig = configService.get('env.cache');
+
+        return {
+          store: keyv,
+          isGlobal: true,
+          ...cacheConfig,
+        };
+      },
+      inject: [KEYV_GLOBAL_KEY, ConfigService],
     }),
   ],
   providers: [CacheHelperService],
