@@ -164,6 +164,7 @@ export class AuthService {
         type,
         role: account.role?.perm,
         username: account.username,
+        corpId: account.corpId,
         lastLoginTime: new Date().toISOString(),
       };
 
