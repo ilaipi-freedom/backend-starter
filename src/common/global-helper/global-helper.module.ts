@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { createKeyv } from '@keyv/redis';
@@ -8,6 +9,7 @@ import { KEYV_GLOBAL_KEY } from 'src/types/global';
 
 import config from '../../config/';
 import { GlobalHelperService } from './global-helper.service';
+import { TransformInterceptor } from '../interceptor/transform.interceptor';
 
 const keyvProvider = {
   provide: KEYV_GLOBAL_KEY,
@@ -24,6 +26,11 @@ const keyvProvider = {
     return keyv;
   },
   inject: [ConfigService],
+};
+
+const transformInterceptorProvider = {
+  provide: APP_INTERCEPTOR,
+  useClass: TransformInterceptor,
 };
 
 @Global()
@@ -66,7 +73,7 @@ const keyvProvider = {
       },
     }),
   ],
-  providers: [GlobalHelperService, keyvProvider],
+  providers: [GlobalHelperService, keyvProvider, transformInterceptorProvider],
   exports: [keyvProvider],
 })
 export class GlobalHelperModule {}
