@@ -79,11 +79,17 @@ function getAllEnvironments() {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const trimmedLine = line.trim();
+      let isEnvLine = false;
       if (trimmedLine.startsWith('#')) {
         const environment = trimmedLine.substring(1).trim();
         if (!environment.startsWith('DATABASE_URL')) {
           continue;
         }
+        isEnvLine = true;
+      } else if (trimmedLine.startsWith('DATABASE_URL')) {
+        isEnvLine = true;
+      }
+      if (isEnvLine) {
         const preLine = lines[i - 1].trim();
         environments.push(preLine.substring(1).trim());
       }
