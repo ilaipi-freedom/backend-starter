@@ -1,0 +1,69 @@
+x-common: &common
+  networks:
+    - deploy
+
+volumes:
+  mysql-api-hub-dev:
+  redis-api-hub-dev:
+
+services:
+  dev_api-hub-mysql:
+    image: mysql:8.0.41
+    <<: *common
+    container_name: mysql-api-hub-dev
+    volumes:
+      - mysql-api-hub-dev:/var/lib/mysql
+    ports:
+      - "$MYSQL_PORT:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --slow_query_log=1
+      --slow_query_log_file=/var/log/mysql/slow.log
+      --long_query_time=1
+      --wait_timeout=28800
+      --interactive_timeout=28800
+      --net_read_timeout=30
+      --net_write_timeout=60
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 3s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "30"
+    sysctls:
+      - net.ipv4.tcp_keepalive_time=60
+      - net.ipv4.tcp_keepalive_intvl=10
+      - net.ipv4.tcp_keepalive_probes=3
+
+  dev_api-hub-redis:
+    image: redis:7.4.2-alpine3.21
+    container_name: redis-api-hub-dev
+    volumes:
+      - redis-api-hub-dev:/data
+    ports:
+      - "$REDIS_PORT:6379"
+    <<: *common
+    restart: always
+    command: /bin/sh -c 'redis-server --appendonly yes --requirepass $REDIS_PASSWORD --bind 0.0.0.0 --tcp-keepalive 60'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "30"

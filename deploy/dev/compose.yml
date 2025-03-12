@@ -1,0 +1,7 @@
+x-common: &common
+  networks:
+    - deploy
+    - nginx
+
+services:
+

@@ -1,0 +1,14 @@
+name: backstage
+
+networks:
+  deploy:
+  nginx:
+    external: true
+    name: aixllent_nginx
+
+include:
+  - path:
+      - ./dev/service.yml
+    env_file:
+      - ./dev/env
+
