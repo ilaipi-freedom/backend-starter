@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
 }
 
 datasource db {
@@ -136,26 +137,4 @@ model SysDictData {
   /// 关联字典
   sysDict SysDict     @relation(fields: [type], references: [type], onDelete: Cascade)
   corp    Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
-}
-
-/// 可用状态
-enum AvailableStatus {
-  normal /// 正常
-  forbidden /// 禁用
-}
-
-enum SysDictCategory {
-  radio
-  select
-  text
-  number
-  date
-  datetime
-  boolean
-}
-
-enum SysMenuType {
-  CATALOG // 目录
-  MENU // 菜单
-  BUTTON // 按钮
 }

@@ -103,6 +103,7 @@ function getAllEnvironments() {
 }
 
 const environment = process.argv[2];
+const syncCommand = 'npx prisma db push --schema .\\prisma\\';
 
 if (environment === 'all') {
   const environments = getAllEnvironments();
@@ -111,7 +112,7 @@ if (environment === 'all') {
     environments.forEach((env) => {
       modifyEnv(env);
       try {
-        execSync('npx prisma db push', { stdio: 'inherit' });
+        execSync(syncCommand, { stdio: 'inherit' });
       } catch (err) {
         console.error(`npx prisma db push 执行失败，环境：${env}`);
       } finally {
@@ -122,7 +123,7 @@ if (environment === 'all') {
 } else if (environment) {
   modifyEnv(environment);
   try {
-    execSync('npx prisma db push', { stdio: 'inherit' });
+    execSync(syncCommand, { stdio: 'inherit' });
     restoreEnv();
   } catch (err) {
     console.error(`npx prisma db push 执行失败，环境：${environment}`);
