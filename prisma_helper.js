@@ -103,7 +103,7 @@ function getAllEnvironments() {
 }
 
 const environment = process.argv[2];
-const syncCommand = 'npx prisma db push --schema .\\prisma\\';
+const syncCommand = 'npx prisma format --schema .\\prisma\\ && npx prisma db push --schema .\\prisma\\';
 
 if (environment === 'all') {
   const environments = getAllEnvironments();

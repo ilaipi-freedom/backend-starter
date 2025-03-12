@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["prismaSchemaFolder"]
 }
 
@@ -12,7 +12,7 @@ datasource db {
 model Corporation {
   id              String          @id @default(cuid())
   name            String          @unique
-  remark          String?
+  remark          String?         @db.Text
   status          AvailableStatus @default(normal)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @default(now()) @updatedAt
@@ -28,7 +28,7 @@ model Dept {
   corpId       String
   name         String
   parentDeptId String?
-  remark       String?
+  remark       String?         @db.Text
   status       AvailableStatus @default(normal)
   sort         Float?
   createdAt    DateTime        @default(now())
@@ -47,6 +47,7 @@ model Role {
   perm           String           @unique() // 权限字符 唯一
   route          String? // 默认路由
   status         AvailableStatus  @default(normal)
+  remark         String?          @db.Text
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @default(now()) @updatedAt
   accounts       Account[]
@@ -64,6 +65,7 @@ model Account {
   phone     String          @unique
   username  String          @unique
   password  String
+  remark    String?         @db.Text
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
   role      Role            @relation(fields: [roleId], references: [id], onDelete: Cascade)
@@ -83,6 +85,7 @@ model SysMenu {
   parentMenuId String?
   status       AvailableStatus @default(normal)
   type         SysMenuType
+  remark       String?         @db.Text
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @default(now()) @updatedAt
 
@@ -110,7 +113,7 @@ model SysDict {
   category  SysDictCategory @default(select)
   name      String
   type      String          @unique
-  remark    String?
+  remark    String?         @db.Text
   status    AvailableStatus @default(normal) /// 当前状态
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
@@ -126,9 +129,9 @@ model SysDictData {
   sort      Float?
   key       String
   label     String
-  value     String
+  value     String          @db.LongText
   type      String
-  remark    String?
+  remark    String?         @db.Text
   extra     Json? /// 扩展信息，对于有些数据，可以配置支持的扩展
   status    AvailableStatus @default(normal) /// 当前状态
   createdAt DateTime        @default(now())

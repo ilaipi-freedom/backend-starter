@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { SysDictHelperService } from './sys-dict-data-helper.service';
+import { SysDictHelperService } from './sys-dict-helper.service';
 
 @Module({
   providers: [SysDictHelperService],
