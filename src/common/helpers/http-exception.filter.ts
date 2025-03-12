@@ -24,7 +24,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.message
         : '系统异常，请稍后重试，或联系管理员';
     this.logger.warn(exception, '系统异常');
-    response.status(status).json({
+    response.status(200).json({
       code: status,
       message,
       path: request.url,
