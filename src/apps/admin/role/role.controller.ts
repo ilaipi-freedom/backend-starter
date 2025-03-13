@@ -139,7 +139,7 @@ export class RoleController {
     schema: {
       type: 'object',
       properties: {
-        perm: {
+        perms: {
           type: 'array',
           items: {
             type: 'string',
@@ -156,8 +156,8 @@ export class RoleController {
   })
   async updatePerm(
     @Param('id') id: string,
-    @Body() payload: { perm: string[] },
+    @Body() payload: { perms: string[] },
   ) {
-    return this.roleService.updatePerm(id, payload.perm);
+    return this.roleService.updatePerm(id, payload.perms);
   }
 }

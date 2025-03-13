@@ -75,18 +75,17 @@ export class RoleService {
       where: { id },
     });
   }
-  async updatePerm(id: string, perm: string[]) {
+  async updatePerm(id: string, perms: string[]) {
     return await this.prisma.$transaction(async (tx: PrismaService) => {
       await tx.roleMenuConfig.deleteMany({
         where: {
           roleId: id,
         },
       });
-      if (perm?.length) {
+      if (perms?.length) {
         const sysMenus = await tx.sysMenu.findMany({
           where: {
-            id: { in: perm },
-            permission: { not: null },
+            id: { in: perms },
           },
           select: {
             permission: true,
