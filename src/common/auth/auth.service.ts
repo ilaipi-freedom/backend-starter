@@ -252,34 +252,21 @@ export class AuthService {
    * @throws UnauthorizedException 当会话无效时
    */
   async validateUser(payload: AuthSessionKey) {
-    this.logger.log('AuthService validateUser - Start', { payload });
     try {
       const sessionKey = AuthHelper.sessionKey(payload);
-      this.logger.log('AuthService validateUser - Session key', { sessionKey });
 
       const sessionStr = await this.redisClient.get(sessionKey);
-      this.logger.log('AuthService validateUser - Session data', {
-        sessionKey,
-        sessionExists: !!sessionStr,
-        sessionData: sessionStr,
-      });
 
       if (!sessionStr) {
-        this.logger.warn('AuthService validateUser - No session found', {
+        this.logger.warn({
           sessionKey,
-        });
+        }, 'AuthService validateUser - No session found');
         throw new UnauthorizedException('Session not found');
       }
 
       const session = JSON.parse(sessionStr) as AuthSession;
-      this.logger.log('AuthService validateUser - Success', { session });
       return session;
     } catch (error) {
-      this.logger.error('AuthService validateUser - Error', {
-        error: error.message,
-        stack: error.stack,
-        payload,
-      });
       throw error;
     }
   }

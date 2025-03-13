@@ -4,10 +4,16 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
+  Put,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { CurrentUser } from 'src/common/helpers/current-user';
 import { AuthSession } from 'src/types/auth';
@@ -23,6 +29,9 @@ export class SysMenuController {
 
   @Post()
   @ApiOperation({ summary: '创建菜单' })
+  @ApiBody({
+    type: CreateMenuDto,
+  })
   create(@Body() createMenuDto: CreateMenuDto) {
     return this.service.create(createMenuDto);
   }
@@ -40,18 +49,24 @@ export class SysMenuController {
   }
 
   @Get(':id')
+  @ApiParam({ name: 'id', description: '菜单ID' })
   @ApiOperation({ summary: '获取菜单详情' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
+  @ApiParam({ name: 'id', description: '菜单ID' })
   @ApiOperation({ summary: '更新菜单' })
+  @ApiBody({
+    type: CreateMenuDto,
+  })
   update(@Param('id') id: string, @Body() updateMenuDto: CreateMenuDto) {
     return this.service.update(id, updateMenuDto);
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'id', description: '菜单ID' })
   @ApiOperation({ summary: '删除菜单' })
   remove(@Param('id') id: string) {
     return this.service.remove(id);
