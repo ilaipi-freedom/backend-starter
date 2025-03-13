@@ -44,7 +44,7 @@ export class RoleController {
   })
   async createRole(
     @CurrentUser() user: AuthSession,
-    @Body() payload: Prisma.RoleCreateInput,
+    @Body() payload: CreateRoleDto,
   ) {
     return this.roleService.create(user, payload);
   }
@@ -68,12 +68,12 @@ export class RoleController {
   })
   async updateRole(
     @Param('id') id: string,
-    @Body() payload: Prisma.RoleCreateInput,
+    @Body() payload: CreateRoleDto,
   ) {
     return this.roleService.update(id, payload);
   }
 
-  @Get()
+  @Get('list')
   @ApiOperation({
     summary: '获取角色列表',
     description: '分页获取角色列表，支持搜索和状态筛选',

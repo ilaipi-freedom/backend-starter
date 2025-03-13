@@ -6,25 +6,18 @@ import { pageOptions } from 'src/common/helpers/page-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { AuthSession } from 'src/types/auth';
 
-import { RoleListQueryDto } from './dto';
-
+import { CreateRoleDto, RoleListQueryDto } from './dto';
 @Injectable()
 export class RoleService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(user: AuthSession, data: Prisma.RoleCreateInput) {
-    const { menu, ...others } = JSON.parse(JSON.stringify(data));
+  async create(user: AuthSession, data: CreateRoleDto) {
     const role = await this.prisma.role.create({
       data: {
-        ...others,
+        ...data,
         corp: { connect: { id: user.corpId } },
       },
     });
-    if (menu?.length) {
-      await this.prisma.roleMenuConfig.createMany({
-        data: menu.map((sysMenuId: string) => ({ sysMenuId, roleId: role.id })),
-      });
-    }
     return role;
   }
 
@@ -39,7 +32,7 @@ export class RoleService {
     }
     return this.prisma.role.delete({ where: { id } });
   }
-  async update(id: string, data: Prisma.RoleCreateInput) {
+  async update(id: string, data: CreateRoleDto) {
     return this.prisma.role.update({
       where: { id },
       data,
@@ -53,7 +46,12 @@ export class RoleService {
       corpId: user.corpId,
     };
     if (query.q) {
-      where.name = { contains: query.q };
+      where.OR = [
+        { name: { contains: query.q } },
+        { perm: { contains: query.q } },
+        { route: { contains: query.q } },
+        { remark: { contains: query.q } },
+      ];
     }
     if (query.status) {
       where.status = query.status;
@@ -65,7 +63,7 @@ export class RoleService {
     });
     return {
       total,
-      list: list.map((row: Role) => ({
+      items: list.map((row: Role) => ({
         ...row,
         createdAt: fmtBy(row.createdAt, 'yyyy-MM-dd HH:mm'),
       })),
