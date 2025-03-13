@@ -47,9 +47,8 @@ export class SysMenuService {
   }
 
   async remove(id: string) {
-    return this.prisma.sysMenu.update({
+    return this.prisma.sysMenu.delete({
       where: { id },
-      data: { status: AvailableStatus.forbidden },
     });
   }
 
