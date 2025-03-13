@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SysMenu } from '@prisma/client';
+import { AvailableStatus, SysMenu } from '@prisma/client';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
@@ -24,7 +24,7 @@ export class SysMenuService {
   async findAll() {
     const menus = await this.prisma.sysMenu.findMany({
       where: {
-        status: 'normal',
+        status: AvailableStatus.normal,
       },
       orderBy: {
         createdAt: 'asc',
@@ -49,15 +49,20 @@ export class SysMenuService {
   async remove(id: string) {
     return this.prisma.sysMenu.update({
       where: { id },
-      data: { status: 'forbidden' },
+      data: { status: AvailableStatus.forbidden },
     });
   }
 
   async findAllMenuTree() {
     const menus = await this.prisma.sysMenu.findMany({
-      where: {
-        status: 'normal',
-      },
+      orderBy: [
+        {
+          orderNo: 'asc',
+        },
+        {
+          createdAt: 'asc',
+        },
+      ],
     });
     return this.buildMenuTree(menus);
   }
@@ -88,7 +93,7 @@ export class SysMenuService {
     // 查询用户有权限的菜单
     const menus = await this.prisma.sysMenu.findMany({
       where: {
-        status: 'normal',
+        status: AvailableStatus.normal,
         permission: {
           in: menuPerms,
         },

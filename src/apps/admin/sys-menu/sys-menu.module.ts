@@ -6,6 +6,5 @@ import { SysMenuService } from './sys-menu.service';
 @Module({
   controllers: [SysMenuController],
   providers: [SysMenuService],
-  exports: [SysMenuService],
 })
 export class SysMenuModule {}

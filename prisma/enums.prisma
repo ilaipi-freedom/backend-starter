@@ -15,7 +15,9 @@ enum SysDictCategory {
 }
 
 enum SysMenuType {
-  CATALOG // 目录
-  MENU // 菜单
-  BUTTON // 按钮
+  catalog // 目录
+  menu // 菜单
+  button // 按钮
+  embedded // 内嵌
+  link // 链接
 }
