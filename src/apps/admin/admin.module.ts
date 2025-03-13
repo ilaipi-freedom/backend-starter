@@ -10,6 +10,7 @@ import { HttpExceptionFilter } from 'src/common/helpers/http-exception.filter';
 import { AccountModule } from './account/account.module';
 import { DeptModule } from './dept/dept.module';
 import { SysMenuModule } from './sys-menu/sys-menu.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SysMenuModule } from './sys-menu/sys-menu.module';
     CacheHelperModule,
     SysMenuModule,
     DeptModule,
+    RoleModule,
   ],
   providers: [
     {

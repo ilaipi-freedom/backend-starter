@@ -1,7 +1,9 @@
-export const pageOptions = (page: number, limit: number, isAll = false) => {
-  if (isAll) return {} as any;
+import { BaseQuery } from "src/types/BaseQuery";
+
+export const pageOptions = (query: BaseQuery) => {
+  if (query.isAll) return {} as any;
   return {
-    take: Number(limit),
-    skip: (page - 1) * limit,
+    take: Number(query.pageSize),
+    skip: (query.page - 1) * query.pageSize,
   };
 };
