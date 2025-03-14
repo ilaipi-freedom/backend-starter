@@ -17,13 +17,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status =
       exception instanceof HttpException
-        ? exception.getStatus()
+        ? (exception.getResponse() as any)?.statusCode || exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
     const message =
       exception instanceof HttpException
-        ? exception.message
+      ? (exception.getResponse() as any)?.message?.[0] || exception.message
         : '系统异常，请稍后重试，或联系管理员';
-    this.logger.warn(exception, '系统异常');
+    this.logger.warn(exception, 'system request error');
     response.status(200).json({
       code: status,
       message,

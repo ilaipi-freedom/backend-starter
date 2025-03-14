@@ -1,4 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateDeptDto {
   @ApiProperty({ description: '部门名称' })
@@ -11,5 +13,8 @@ export class CreateDeptDto {
   remark?: string;
 
   @ApiPropertyOptional({ description: '排序' })
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : null))
   sort?: number;
 }
