@@ -62,7 +62,7 @@ model Account {
   roleId    String
   status    AvailableStatus @default(normal)
   name      String
-  phone     String          @unique
+  phone     String?         @unique
   username  String          @unique
   password  String
   remark    String?         @db.Text
