@@ -49,9 +49,4 @@ const cliBootstrap = async (mo: any) => {
   createServer().listen();
 };
 
-const isProd = (config: ConfigService) => {
-  const deployment = config.get('env.appDeployment');
-  return deployment === 'prod';
-};
-
-export { isProd, serverBootstrap, cliBootstrap };
+export { serverBootstrap, cliBootstrap };
