@@ -10,6 +10,9 @@ export default () => {
     appInstance,
     isProduction: process.env.NODE_ENV === 'production',
     appDeployment: process.env.APP_DEPLOYMENT,
+    isProd:
+      process.env.APP_DEPLOYMENT === 'prod' &&
+      process.env.NODE_ENV === 'production',
     bootstrap: {
       appPort: process.env[appPortKey] || 6000,
       apiPrefix: process.env[`${prefix}_API_PREFIX`] || '',
