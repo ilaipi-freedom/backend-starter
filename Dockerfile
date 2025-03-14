@@ -23,7 +23,7 @@ RUN npm install
 
 FROM dev as build
 COPY . ./
-RUN npx prisma generate
+RUN npx prisma generate --schema ./prisma/
 RUN npm run build:obfuscate
 
 FROM base as release
