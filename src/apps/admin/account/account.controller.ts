@@ -18,6 +18,19 @@ export class AccountController {
     return this.service.getAccountInfo(user);
   }
 
+  @Get('/permBtnCodes')
+  @ApiOperation({
+    summary: '获取当前用户权限按钮码',
+    description: '获取当前登录用户的所有权限按钮码',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '成功获取权限按钮码列表',
+  })
+  async permBtnCodes(@CurrentUser() user: AuthSession) {
+    return this.service.getPermBtnCodes(user);
+  }
+
   @Get('/permCode')
   @ApiOperation({
     summary: '获取当前用户权限码',

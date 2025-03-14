@@ -14,7 +14,11 @@ export class AccountService {
   private readonly logger = new Logger(AccountService.name);
   constructor(private readonly prisma: PrismaService) {}
 
-  async getPermCode(user: AuthSession) {
+  async getPermBtnCodes(user: AuthSession) {
+    return this.getPermCode(user, SysMenuType.button);
+  }
+
+  async getPermCode(user: AuthSession, type?: SysMenuType) {
     const account = await this.prisma.account.findUnique({
       where: { id: user.id },
     });
@@ -25,9 +29,7 @@ export class AccountService {
     const list = await this.prisma.roleMenuConfig.findMany({
       where: {
         roleId: account.roleId,
-        sysMenu: {
-          type: { not: SysMenuType.catalog },
-        },
+        ...(type ? { sysMenu: { type } } : {}),
       },
       include: {
         sysMenu: {
