@@ -6,7 +6,9 @@ import { AuthSession } from 'src/types/auth';
 
 import { AccountService } from './account.service';
 import { CreateAccountDto, UpdateAccountDto, AccountQuery, ResetPasswordDto } from './dto';
+import { ForbiddenDemo } from 'src/common/decorators/forbidden-demo.decorator';
 
+@ForbiddenDemo()
 @ApiTags('账号')
 @ApiBearerAuth()
 @Controller('account')

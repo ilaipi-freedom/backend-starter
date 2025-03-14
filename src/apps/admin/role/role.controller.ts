@@ -23,7 +23,9 @@ import { RoleService } from './role.service';
 import { CreateRoleDto, RoleListQueryDto } from './dto';
 import { CurrentUser } from 'src/common/helpers/current-user';
 import { AuthSession } from 'src/types/auth';
+import { ForbiddenDemo } from 'src/common/decorators/forbidden-demo.decorator';
 
+@ForbiddenDemo()
 @Controller('role')
 @ApiTags('角色')
 @ApiBearerAuth()

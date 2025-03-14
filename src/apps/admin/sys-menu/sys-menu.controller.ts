@@ -20,7 +20,9 @@ import { AuthSession } from 'src/types/auth';
 
 import { CreateMenuDto } from './dto';
 import { SysMenuService } from './sys-menu.service';
+import { ForbiddenDemo } from 'src/common/decorators/forbidden-demo.decorator';
 
+@ForbiddenDemo()
 @ApiTags('系统菜单')
 @ApiBearerAuth()
 @Controller('sys-menu')

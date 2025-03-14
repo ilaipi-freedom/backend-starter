@@ -22,7 +22,9 @@ import { AuthSession } from 'src/types/auth';
 
 import { DeptService } from './dept.service';
 import { CreateDeptDto } from './dto';
+import { ForbiddenDemo } from 'src/common/decorators/forbidden-demo.decorator';
 
+@ForbiddenDemo()
 @ApiTags('部门')
 @ApiBearerAuth()
 @Controller('dept')

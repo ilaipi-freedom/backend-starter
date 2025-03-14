@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 
 import { JwtAuthGuard } from 'src/common/auth/auth.guard';
+import { DemoRoleGuard } from 'src/common/auth/demo-role.guard';
 import { AuthModule } from 'src/common/auth/auth.module';
 import { CacheHelperModule } from 'src/common/cache-helper/cache-helper.module';
 import { GlobalHelperModule } from 'src/common/global-helper/global-helper.module';
@@ -30,6 +31,10 @@ import { RoleModule } from './role/role.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: DemoRoleGuard,
     },
   ],
 })
