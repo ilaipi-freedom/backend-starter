@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { AuthSession } from 'src/types/auth';
 import { SysDictHelperService } from 'src/common/sys-dict-helper/sys-dict-helper.service';
 import { SysDictDataQuery } from 'src/common/sys-dict-helper/dto';
+
+import { CreateSysDictDataDto } from './dto';
 
 @Injectable()
 export class SysDictDataService {
@@ -13,11 +14,15 @@ export class SysDictDataService {
     private readonly sysDictHelper: SysDictHelperService,
   ) {}
 
-  async create(user: AuthSession, data: Prisma.SysDictDataCreateInput) {
-    return this.prisma.sysDictData.create({
+  async create(user: AuthSession, data: CreateSysDictDataDto) {
+    return await this.prisma.sysDictData.create({
       data: {
         ...data,
-        corp: { connect: { id: user.corpId } },
+        corpId: user.corpId,
+      },
+      include: {
+        corp: true,
+        sysDict: true,
       },
     });
   }
@@ -26,7 +31,7 @@ export class SysDictDataService {
     return this.prisma.sysDictData.delete({ where: { id } });
   }
 
-  async update(id: string, data: Prisma.SysDictDataUpdateInput) {
+  async update(id: string, data: CreateSysDictDataDto) {
     return this.prisma.sysDictData.update({
       where: { id },
       data,

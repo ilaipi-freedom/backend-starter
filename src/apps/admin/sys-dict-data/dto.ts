@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSysDictDataDto {
   @ApiProperty({
@@ -6,6 +8,9 @@ export class CreateSysDictDataDto {
     description: '显示顺序',
     example: 1,
   })
+  @IsNumber()
+  @IsOptional()
+  @Transform(({ value }) => (value ? Number(value) : undefined))
   sort?: number;
 
   @ApiProperty({
@@ -13,7 +18,7 @@ export class CreateSysDictDataDto {
     description: '字典键',
     example: 'ship-route-way',
   })
-  key?: string;
+  key: string;
 
   @ApiProperty({
     description: '字典标签',
@@ -31,6 +36,7 @@ export class CreateSysDictDataDto {
     description: '字典类型',
     example: 'sys_normal_disable',
   })
+  @IsString()
   type: string;
 
   @ApiProperty({

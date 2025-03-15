@@ -8,7 +8,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -47,7 +46,7 @@ export class SysDictDataController {
   })
   async createSysDictData(
     @CurrentUser() user: AuthSession,
-    @Body() payload: Prisma.SysDictDataCreateInput,
+    @Body() payload: CreateSysDictDataDto,
   ) {
     return this.sysDictDataService.create(user, payload);
   }
@@ -73,7 +72,7 @@ export class SysDictDataController {
   })
   async updateSysDictData(
     @Param('id') id: string,
-    @Body() payload: Prisma.SysDictDataCreateInput,
+    @Body() payload: CreateSysDictDataDto,
   ) {
     return this.sysDictDataService.update(id, payload);
   }
