@@ -44,11 +44,11 @@ export class SysDictService {
       ];
     }
     const total = await this.prisma.sysDict.count({ where });
-    const list = await this.prisma.sysDict.findMany({
+    const items = await this.prisma.sysDict.findMany({
       where,
       ...pageOptions(query),
     });
-    return { total, list };
+    return { total, items };
   }
 
   async getById(id: string) {
