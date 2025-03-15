@@ -12,6 +12,8 @@ import { AccountModule } from './account/account.module';
 import { DeptModule } from './dept/dept.module';
 import { SysMenuModule } from './sys-menu/sys-menu.module';
 import { RoleModule } from './role/role.module';
+import { SysDictModule } from './sys-dict/sys-dict.module';
+import { SysDictDataModule } from './sys-dict-data/sys-dict-data.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { RoleModule } from './role/role.module';
     SysMenuModule,
     DeptModule,
     RoleModule,
+    SysDictModule,
+    SysDictDataModule,
   ],
   providers: [
     {
