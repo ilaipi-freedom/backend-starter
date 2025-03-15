@@ -1,10 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsNotEmpty,
-  IsEnum,
-} from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsEnum } from 'class-validator';
 import { AvailableStatus } from '@prisma/client';
 
 import { BaseQuery } from 'src/types/BaseQuery';
@@ -36,31 +31,31 @@ export class CreateAccountDto {
   roleId: string;
 }
 
-export class UpdateAccountDto extends CreateAccountDto {
+export class UpdateAccountDto {
   @ApiPropertyOptional({ description: '姓名' })
-  @IsOptional()
   @IsString()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @ApiPropertyOptional({ description: '用户名' })
-  @IsOptional()
   @IsString()
-  username: string;
+  @IsOptional()
+  username?: string;
 
   @ApiPropertyOptional({ description: '密码' })
-  @IsOptional()
   @IsString()
-  password: string;
+  @IsOptional()
+  password?: string;
 
   @ApiPropertyOptional({ description: '手机号' })
-  @IsOptional()
   @IsString()
-  phone: string;
+  @IsOptional()
+  phone?: string;
 
   @ApiPropertyOptional({ description: '角色ID' })
-  @IsOptional()
   @IsString()
-  roleId: string;
+  @IsOptional()
+  roleId?: string;
 }
 
 export class AccountQuery extends BaseQuery {

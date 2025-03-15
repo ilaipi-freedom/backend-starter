@@ -113,14 +113,16 @@ model SysDict {
   corpId    String
   category  SysDictCategory @default(select)
   name      String
-  type      String          @unique
+  type      String
   remark    String?         @db.Text
   status    AvailableStatus @default(normal) /// 当前状态
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
 
-  sysDictDataList SysDictData[]
-  corp            Corporation   @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  corp         Corporation   @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  dictDataList SysDictData[]
+
+  @@unique([corpId, type])
 }
 
 /// 系统字典数据
@@ -138,7 +140,6 @@ model SysDictData {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
 
-  /// 关联字典
-  sysDict SysDict     @relation(fields: [type], references: [type], onDelete: Cascade)
   corp    Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  sysDict SysDict     @relation(fields: [corpId, type], references: [corpId, type], onDelete: Cascade)
 }

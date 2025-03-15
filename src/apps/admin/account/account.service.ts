@@ -1,13 +1,23 @@
-import { Injectable, Logger, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { map } from 'lodash';
-import { Prisma, SysMenuType } from '@prisma/client';
+import { Prisma, SysMenuType, RoleMenuConfig } from '@prisma/client';
 import * as argon2 from 'argon2';
 
 import { pageOptions } from 'src/common/helpers/page-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { AuthSession } from 'src/types/auth';
 
-import { CreateAccountDto, UpdateAccountDto, AccountQuery, ResetPasswordDto } from './dto';
+import {
+  CreateAccountDto,
+  UpdateAccountDto,
+  AccountQuery,
+  ResetPasswordDto,
+} from './dto';
 
 @Injectable()
 export class AccountService {
@@ -26,7 +36,7 @@ export class AccountService {
       this.logger.log({ user, account }, '用户不存在或未配置角色');
       throw new BadRequestException('用户状态异常，请联系管理员');
     }
-    const list = await this.prisma.roleMenuConfig.findMany({
+    const list: RoleMenuConfig[] = await this.prisma.roleMenuConfig.findMany({
       where: {
         roleId: account.roleId,
         ...(type ? { sysMenu: { type } } : {}),
@@ -40,7 +50,7 @@ export class AccountService {
         },
       },
     });
-    return map(list, 'sysMenu.permission');
+    return map(list, 'sysMenu.permission') as string[];
   }
 
   async getPermCodeByRole(roleId: string) {
@@ -58,7 +68,7 @@ export class AccountService {
         },
       },
     });
-    return map(list, 'sysMenu.id');
+    return map(list, 'sysMenu.id') as string[];
   }
   async create(user: AuthSession, dto: CreateAccountDto) {
     const hashedPassword = await argon2.hash(dto.password);
@@ -87,7 +97,7 @@ export class AccountService {
   }
 
   async update(user: AuthSession, id: string, dto: UpdateAccountDto) {
-    const data: any = {
+    const data: Prisma.AccountUpdateInput = {
       ...(dto.roleId ? { roleId: dto.roleId } : {}),
       ...(dto.password ? { password: await argon2.hash(dto.password) } : {}),
       ...(dto.username ? { username: dto.username.toLowerCase() } : {}),
