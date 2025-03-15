@@ -119,7 +119,8 @@ model SysDict {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
 
-  corp Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  corp         Corporation   @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  dictDataList SysDictData[]
 
   @@unique([corpId, type])
 }
@@ -139,5 +140,6 @@ model SysDictData {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
 
-  corp Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  corp    Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  sysDict SysDict     @relation(fields: [corpId, type], references: [corpId, type], onDelete: Cascade)
 }
