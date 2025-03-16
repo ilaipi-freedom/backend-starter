@@ -78,7 +78,7 @@ model SysMenu {
   type         SysMenuType
   name         String // 路由名称，必须设置且唯一
   parentMenuId String?
-  meta         Json? // 元数据，包含 title、icon、activeIcon、badgeType、badge、badgeVariants、keepAlive、hideInMenu、hideChildrenInMenu、hideInBreadcrumb、hideInTab、affixTab、link 等信息
+  meta         Json? // 元数据，包含 title、icon、activeIcon、badgeType、badge、badgeVariants、keepAlive、hideInMenu、hideChildrenInMenu、hideInBreadcrumb、hideInTab、affixTab、link、order 等信息
   path         String // URL 路径
   activePath   String? // 激活路径
   component    String? // 组件路径
@@ -86,7 +86,6 @@ model SysMenu {
 
   status    AvailableStatus @default(normal)
   remark    String?         @db.Text
-  orderNo   Float?
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
 
