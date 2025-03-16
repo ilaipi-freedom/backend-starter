@@ -3,7 +3,9 @@ import { AvailableStatus, SysMenu, SysMenuType } from '@prisma/client';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
-import { CreateMenuDto } from './dto';
+import { CreateMenuDto, MenuMetaDto } from './dto';
+
+type MenuTreeType = SysMenu & { children?: MenuTreeType[] };
 
 @Injectable()
 export class SysMenuService {
@@ -56,9 +58,6 @@ export class SysMenuService {
     const menus = await this.prisma.sysMenu.findMany({
       orderBy: [
         {
-          orderNo: 'asc',
-        },
-        {
           createdAt: 'asc',
         },
       ],
@@ -106,10 +105,10 @@ export class SysMenuService {
   private buildMenuTree(
     menus: SysMenu[],
     parentId: string | null = null,
-  ): any[] {
+  ): MenuTreeType[] {
     const sortedMenus = menus.sort((a, b) => {
-      const orderA = a.orderNo ?? 0;
-      const orderB = b.orderNo ?? 0;
+      const orderA = (a.meta as MenuMetaDto).order ?? 0;
+      const orderB = (b.meta as MenuMetaDto).order ?? 0;
       if (orderA === orderB) {
         return a.createdAt.getTime() - b.createdAt.getTime();
       }
@@ -128,6 +127,6 @@ export class SysMenuService {
         tree.push(node);
       }
     }
-    return tree;
+    return tree as MenuTreeType[];
   }
 }

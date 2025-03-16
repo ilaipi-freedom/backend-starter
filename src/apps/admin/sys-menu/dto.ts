@@ -30,6 +30,11 @@ export class MenuMetaDto {
   affixTab?: boolean;
   @ApiPropertyOptional({ description: '链接地址' })
   link?: string;
+  @ApiPropertyOptional({ description: '排序' })
+  @IsNumber()
+  @IsOptional()
+  @Transform(({ value }) => (value ? Number(value) : null))
+  order?: number;
 
   [key: string]: any;
 }
@@ -51,9 +56,4 @@ export class CreateMenuDto {
   meta?: MenuMetaDto;
   @ApiPropertyOptional({ description: '父菜单ID' })
   parentMenuId?: string;
-  @ApiPropertyOptional({ description: '排序号' })
-  @IsNumber()
-  @IsOptional()
-  @Transform(({ value }) => (value ? Number(value) : null))
-  orderNo?: number;
 }
