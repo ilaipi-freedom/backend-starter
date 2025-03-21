@@ -66,6 +66,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
+    "@types/ms": "^2.1.0",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",

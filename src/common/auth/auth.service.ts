@@ -5,13 +5,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModuleOptions, JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { AvailableStatus } from '@prisma/client';
-import ms from 'ms';
+import ms, { StringValue } from 'ms';
 import { RedisClientType } from '@redis/client';
+
+import { AppInstanceEnum } from 'src/types/helper';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthHelper } from '../helpers/auth-helper';
@@ -125,16 +127,18 @@ export class AuthService {
   }
 
   getTokenExpireTime(date?: Date) {
-    const app = this.configService.get('env.appInstance');
-    const jwtConfig = this.configService.get(`env.jwt.${app}`);
-    const expiresIn = jwtConfig?.signOptions?.expiresIn || '7d';
+    const app = this.configService.get<AppInstanceEnum>('env.appInstance');
+    const jwtConfig = this.configService.get<JwtModuleOptions>(
+      `env.jwt.${app}`,
+    );
+    const expiresIn = (jwtConfig?.signOptions?.expiresIn as string) || '7d';
 
+    const expiresInMs = ms(expiresIn as StringValue);
     // 计算过期的时间戳（秒）
     const expiresAt = NP.plus(
       Math.floor((date?.getTime() || Date.now()) / 1000),
-      Math.floor(ms(expiresIn) / 1000),
+      Math.floor(NP.divide(expiresInMs, 1000)),
     );
-    this.logger.log({ expiresAt }, '过期时间');
     return expiresAt;
   }
 
@@ -154,11 +158,11 @@ export class AuthService {
       const account = await this.verifyAccount(username, pass);
       const expiresAt = this.getTokenExpireTime();
 
-      const type = await this.configService.get('env.appInstance');
-      const payload = { id: account.id, key: 'AUTH', type };
+      const type = this.configService.get<AppInstanceEnum>('env.appInstance');
+      const payload: AuthSessionKey = { id: account.id, key: 'AUTH', type };
       const sessionKey = AuthHelper.sessionKey(payload);
       const token = await this.jwtService.signAsync(payload);
-      
+
       const sessionParam = {
         id: account.id,
         type,
@@ -170,7 +174,7 @@ export class AuthService {
 
       // 使用 SET with EXAT 选项，一个原子操作完成设置值和过期时间
       await this.redisClient.set(sessionKey, JSON.stringify(sessionParam), {
-        EXAT: expiresAt
+        EXAT: expiresAt,
       });
 
       this.logger.log(
@@ -188,7 +192,7 @@ export class AuthService {
         role: account.role?.perm ? [account.role.perm] : [],
         token,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(
         {
           username,
@@ -231,7 +235,7 @@ export class AuthService {
       );
 
       return { success: true, message: '登出成功' };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(
         {
           accountId: payload.id,
@@ -252,22 +256,21 @@ export class AuthService {
    * @throws UnauthorizedException 当会话无效时
    */
   async validateUser(payload: AuthSessionKey) {
-    try {
-      const sessionKey = AuthHelper.sessionKey(payload);
+    const sessionKey = AuthHelper.sessionKey(payload);
 
-      const sessionStr = await this.redisClient.get(sessionKey);
+    const sessionStr = await this.redisClient.get(sessionKey);
 
-      if (!sessionStr) {
-        this.logger.warn({
+    if (!sessionStr) {
+      this.logger.warn(
+        {
           sessionKey,
-        }, 'AuthService validateUser - No session found');
-        throw new UnauthorizedException('Session not found');
-      }
-
-      const session = JSON.parse(sessionStr) as AuthSession;
-      return session;
-    } catch (error) {
-      throw error;
+        },
+        'AuthService validateUser - No session found',
+      );
+      throw new UnauthorizedException('Session not found');
     }
+
+    const session = JSON.parse(sessionStr) as AuthSession;
+    return session;
   }
 }
