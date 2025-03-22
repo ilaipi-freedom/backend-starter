@@ -17,7 +17,11 @@ import { AppInstanceEnum } from 'src/types/helper';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthHelper } from '../helpers/auth-helper';
-import { AuthSession, AuthSessionKey } from '../../types/auth';
+import {
+  AuthSession,
+  AuthSessionKey,
+  AuthSessionKeyEnum,
+} from '../../types/auth';
 import { CacheHelperService } from '../cache-helper/cache-helper.service';
 import NP from '../helpers/number-helper';
 
@@ -159,7 +163,11 @@ export class AuthService {
       const expiresAt = this.getTokenExpireTime();
 
       const type = this.configService.get<AppInstanceEnum>('env.appInstance');
-      const payload: AuthSessionKey = { id: account.id, key: 'AUTH', type };
+      const payload: AuthSessionKey = {
+        id: account.id,
+        key: AuthSessionKeyEnum.AUTH,
+        type,
+      };
       const sessionKey = AuthHelper.sessionKey(payload);
       const token = await this.jwtService.signAsync(payload);
 
@@ -219,7 +227,7 @@ export class AuthService {
     try {
       const sessionKeyParam = {
         id: payload.id,
-        key: 'AUTH',
+        key: AuthSessionKeyEnum.AUTH,
         type: payload.type,
       };
       const sessionKey = AuthHelper.sessionKey(sessionKeyParam);
