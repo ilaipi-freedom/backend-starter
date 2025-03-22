@@ -10,12 +10,18 @@ datasource db {
 
 /// 企业
 model Corporation {
-  id              String          @id @default(cuid())
-  name            String          @unique
-  remark          String?         @db.Text
-  status          AvailableStatus @default(normal)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @default(now()) @updatedAt
+  id           String          @id @default(cuid())
+  name         String          @unique
+  parentCorpId String?
+  remark       String?         @db.Text
+  status       AvailableStatus @default(normal)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  parentCorp Corporation?  @relation("Corporation_parent_Corporation", fields: [parentCorpId], references: [id], onDelete: Cascade)
+  children   Corporation[] @relation("Corporation_parent_Corporation")
+
   roles           Role[]
   accounts        Account[]
   sysDicts        SysDict[]
@@ -70,6 +76,7 @@ model Account {
   updatedAt DateTime        @default(now()) @updatedAt
   role      Role            @relation(fields: [roleId], references: [id], onDelete: Cascade)
   corp      Corporation     @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  loginLogs LoginLog[]
 }
 
 /// 菜单
@@ -141,4 +148,19 @@ model SysDictData {
 
   corp    Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
   sysDict SysDict     @relation(fields: [corpId, type], references: [corpId, type], onDelete: Cascade)
+}
+
+/// 登录日志
+model LoginLog {
+  id        String   @id @default(cuid())
+  accountId String
+  username  String
+  ip        String?
+  userAgent String?  @db.Text
+  status    String   @default("SUCCESS") // SUCCESS, FAILED, LOGOUT, LOGOUT_ALL
+  extra     Json? // 更多信息
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 }
