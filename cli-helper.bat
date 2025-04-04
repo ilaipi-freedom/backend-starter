@@ -23,3 +23,4 @@ call npx nest g --no-spec s %ENTITY_NAME%
 rem mv to app
 move "src\%ENTITY_NAME%" "src\apps\%APP_NAME%"
 
+call npx eslint --fix "src\apps\%APP_NAME%"

@@ -3,6 +3,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { createKeyv } from '@keyv/redis';
+import { Request } from 'express';
 
 import { PrismaModule } from 'src/common/prisma/prisma.module';
 import { KEYV_GLOBAL_KEY } from 'src/types/global';
@@ -14,7 +15,7 @@ import { TransformInterceptor } from '../interceptor/transform.interceptor';
 const keyvProvider = {
   provide: KEYV_GLOBAL_KEY,
   useFactory: (configService: ConfigService) => {
-    const redisUrl = configService.get('env.redis.url');
+    const redisUrl = configService.get<string>('env.redis.url');
     const keyv = createKeyv({
       url: redisUrl,
       pingInterval: 3000,
@@ -42,12 +43,12 @@ const transformInterceptorProvider = {
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const isProduction = config.get('env.isProduction');
+        const isProduction = config.get<boolean>('env.isProduction');
         if (isProduction) {
           return {
             pinoHttp: {
               serializers: {
-                req(req) {
+                req(req: Request & { raw: { body: unknown } }) {
                   req.body = req.raw.body;
                   return req;
                 },
@@ -62,7 +63,7 @@ const transformInterceptorProvider = {
         return {
           pinoHttp: {
             serializers: {
-              req(req) {
+              req(req: Request & { raw: { body: unknown } }) {
                 req.body = req.raw.body;
                 return req;
               },
