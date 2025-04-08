@@ -10,7 +10,7 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { AvailableStatus } from '@prisma/client';
-import ms, { StringValue } from 'ms';
+import * as ms from 'ms';
 import { RedisClientType } from '@redis/client';
 
 import { AppInstanceEnum } from 'src/types/helper';
@@ -144,7 +144,7 @@ export class AuthService {
     );
     const expiresIn = (jwtConfig?.signOptions?.expiresIn as string) || '7d';
 
-    const expiresInMs = ms(expiresIn as StringValue);
+    const expiresInMs = ms(expiresIn as ms.StringValue);
     // 计算过期的时间戳（秒）
     const expiresAt = NP.plus(
       Math.floor((date?.getTime() || Date.now()) / 1000),
