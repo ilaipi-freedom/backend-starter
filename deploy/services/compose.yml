@@ -3,16 +3,16 @@ x-common: &common
     - deploy
 
 volumes:
-  mysql-api-hub-dev:
-  redis-api-hub-dev:
+  mysql-data:
+  redis-data:
 
 services:
-  dev_api-hub-mysql:
+  mysql:
     image: mysql:8.0.41
     <<: *common
-    container_name: mysql-api-hub-dev
+    container_name: mysql
     volumes:
-      - mysql-api-hub-dev:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     ports:
       - "$MYSQL_PORT:3306"
     restart: always
@@ -46,11 +46,11 @@ services:
       - net.ipv4.tcp_keepalive_intvl=10
       - net.ipv4.tcp_keepalive_probes=3
 
-  dev_api-hub-redis:
+  redis:
     image: redis:7.4.2-alpine3.21
-    container_name: redis-api-hub-dev
+    container_name: redis
     volumes:
-      - redis-api-hub-dev:/data
+      - redis-data:/data
     ports:
       - "$REDIS_PORT:6379"
     <<: *common

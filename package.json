@@ -109,6 +109,9 @@
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
   },
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "overrides": {
     "glob": "^11.0.1",
     "inflight": "npm:lru-cache@^10.0.0",
