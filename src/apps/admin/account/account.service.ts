@@ -2,12 +2,12 @@ import {
   Injectable,
   BadRequestException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { map } from 'lodash';
 import { Prisma, SysMenuType, RoleMenuConfig } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 import { pageOptions } from 'src/common/helpers/page-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
@@ -24,12 +24,11 @@ import { AppInstanceEnum } from 'src/types/helper';
 
 @Injectable()
 export class AccountService {
+  private readonly logger = new Logger(AccountService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
-    @InjectPinoLogger(AccountService.name)
-    private readonly logger: PinoLogger,
   ) {}
 
   async getPermBtnCodes(user: AuthSession) {
@@ -41,7 +40,7 @@ export class AccountService {
       where: { id: user.id },
     });
     if (!account?.roleId) {
-      this.logger.info({ user, account }, '用户不存在或未配置角色');
+      this.logger.warn({ user, account }, '用户不存在或未配置角色');
       throw new BadRequestException('用户状态异常，请联系管理员');
     }
     const list: RoleMenuConfig[] = await this.prisma.roleMenuConfig.findMany({

@@ -1,16 +1,18 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  constructor(
-    @InjectPinoLogger(PrismaService.name)
-    private readonly logger: PinoLogger,
-  ) {
+  private readonly logger = new Logger(PrismaService.name);
+  constructor() {
     super({
       log: [
         {
@@ -46,18 +48,18 @@ export class PrismaService
     try {
       await this.$connect();
       this.$on('query' as never, (event) => {
-        this.logger.info({ event }, 'Prisma Query');
+        this.logger.log({ event }, 'Prisma Query');
       });
       this.$on('error' as never, (event) => {
         this.logger.error({ event }, 'Prisma Error');
       });
       this.$on('info' as never, (event) => {
-        this.logger.info({ event }, 'Prisma Info');
+        this.logger.log({ event }, 'Prisma Info');
       });
       this.$on('warn' as never, (event) => {
         this.logger.warn({ event }, 'Prisma Warn');
       });
-      this.logger.info('Successfully connected to database');
+      this.logger.log('Successfully connected to database');
     } catch (error) {
       this.logger.error('Failed to connect to database', error);
       throw error;
@@ -67,7 +69,7 @@ export class PrismaService
   async onModuleDestroy() {
     try {
       await this.$disconnect();
-      this.logger.info('Successfully disconnected from database');
+      this.logger.log('Successfully disconnected from database');
     } catch (error) {
       this.logger.error('Error disconnecting from database', error);
       throw error;

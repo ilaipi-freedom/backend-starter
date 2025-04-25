@@ -1,19 +1,15 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { RedisClientType } from '@redis/client';
 import { Keyv } from '@keyv/redis';
-import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 import { KEYV_GLOBAL_KEY } from 'src/types/global';
 
 @Injectable()
 export class CacheHelperService implements OnModuleInit {
   private redisClient: RedisClientType;
+  private readonly logger = new Logger(CacheHelperService.name);
 
-  constructor(
-    @Inject(KEYV_GLOBAL_KEY) private readonly keyv: Keyv,
-    @InjectPinoLogger(CacheHelperService.name)
-    private readonly logger: PinoLogger,
-  ) {}
+  constructor(@Inject(KEYV_GLOBAL_KEY) private readonly keyv: Keyv) {}
 
   onModuleInit() {
     try {
@@ -57,11 +53,11 @@ export class CacheHelperService implements OnModuleInit {
     });
 
     this.redisClient.on('connect', () => {
-      this.logger.info('Redis client connected');
+      this.logger.log('Redis client connected');
     });
 
     this.redisClient.on('reconnecting', () => {
-      this.logger.info('Redis client reconnecting...');
+      this.logger.log('Redis client reconnecting...');
     });
 
     this.redisClient.on('end', () => {
@@ -72,7 +68,7 @@ export class CacheHelperService implements OnModuleInit {
   private async validateRedisConnection() {
     try {
       await this.redisClient.ping();
-      this.logger.info('Redis connection validated successfully');
+      this.logger.log('Redis connection validated successfully');
       return true;
     } catch (error: unknown) {
       this.logger.warn({ error }, 'Redis connection validation warning');
