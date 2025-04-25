@@ -1,9 +1,10 @@
 import {
   Injectable,
-  Logger,
   BadRequestException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { map } from 'lodash';
 import { Prisma, SysMenuType, RoleMenuConfig } from '@prisma/client';
 import * as argon2 from 'argon2';
@@ -11,6 +12,7 @@ import * as argon2 from 'argon2';
 import { pageOptions } from 'src/common/helpers/page-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { AuthSession } from 'src/types/auth';
+import { AuthService } from 'src/common/auth/auth.service';
 
 import {
   CreateAccountDto,
@@ -18,11 +20,16 @@ import {
   AccountQuery,
   ResetPasswordDto,
 } from './dto';
+import { AppInstanceEnum } from 'src/types/helper';
 
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
+  ) {}
 
   async getPermBtnCodes(user: AuthSession) {
     return this.getPermCode(user, SysMenuType.button);
@@ -33,7 +40,7 @@ export class AccountService {
       where: { id: user.id },
     });
     if (!account?.roleId) {
-      this.logger.log({ user, account }, '用户不存在或未配置角色');
+      this.logger.warn({ user, account }, '用户不存在或未配置角色');
       throw new BadRequestException('用户状态异常，请联系管理员');
     }
     const list: RoleMenuConfig[] = await this.prisma.roleMenuConfig.findMany({
@@ -213,17 +220,26 @@ export class AccountService {
     return account;
   }
 
-  async resetPassword(id: string, payload: ResetPasswordDto) {
+  async resetPassword(
+    id: string,
+    payload: ResetPasswordDto,
+    context: { ip: string; userAgent: string },
+  ) {
     if (!payload.password) {
       throw new BadRequestException('密码不能为空');
     }
     const password = await argon2.hash(payload.password);
-    return this.prisma.account.update({
+    const user = await this.prisma.account.update({
       where: { id },
       data: { password },
       select: {
         id: true,
+        username: true,
+        corpId: true,
       },
     });
+    const type = this.configService.get<AppInstanceEnum>('env.appInstance');
+    await this.authService.signOutAll({ ...user, type }, context);
+    return user;
   }
 }

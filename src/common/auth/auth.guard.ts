@@ -5,6 +5,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
+
+import { TAuthSession } from 'src/types/auth';
 
 import { IS_PUBLIC_KEY } from '../helpers/public';
 
@@ -25,25 +28,28 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     try {
       const canActivate = (await super.canActivate(context)) as boolean;
       return canActivate;
-    } catch (err) {
-      if (err.name === 'TokenExpiredError') {
+    } catch (err: unknown) {
+      if (err instanceof TokenExpiredError) {
         throw new UnauthorizedException('Token has expired');
       }
-      if (err.name === 'JsonWebTokenError') {
+      if (err instanceof JsonWebTokenError) {
         throw new UnauthorizedException('Invalid token');
       }
-      if (err.message === 'No auth token') {
+      if (err instanceof Error && err.message === 'No auth token') {
         throw new UnauthorizedException('No token provided');
       }
       throw err;
     }
   }
-
-  handleRequest(err: any, user: any, info: any) {
+  handleRequest<TUser = TAuthSession>(
+    err: unknown,
+    user: TUser,
+    info: unknown,
+  ) {
     if (err || !user) {
-      if (info && info.name === 'TokenExpiredError') {
+      if (info && info instanceof TokenExpiredError) {
         throw new UnauthorizedException('Token has expired');
-      } else if (info && info.name === 'JsonWebTokenError') {
+      } else if (info && info instanceof JsonWebTokenError) {
         throw new UnauthorizedException('Invalid token');
       }
       throw err || new UnauthorizedException();

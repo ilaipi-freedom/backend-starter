@@ -1,14 +1,12 @@
-name: backstage
+name: starter
 
 networks:
   deploy:
   nginx:
-    external: true
-    name: aixllent_nginx
 
 include:
   - path:
-      - ./dev/service.yml
+      - ./services/compose.yml
     env_file:
-      - ./dev/env
+      - ./services/env
 

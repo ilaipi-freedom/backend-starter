@@ -1,37 +1,42 @@
 import {
   Inject,
   Injectable,
-  Logger,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModuleOptions, JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { AvailableStatus } from '@prisma/client';
-import ms from 'ms';
+import * as ms from 'ms';
 import { RedisClientType } from '@redis/client';
+import { AppInstanceEnum } from 'src/types/helper';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthHelper } from '../helpers/auth-helper';
-import { AuthSession, AuthSessionKey } from '../../types/auth';
+import {
+  AuthSession,
+  AuthSessionKey,
+  AuthSessionKeyEnum,
+} from '../../types/auth';
 import { CacheHelperService } from '../cache-helper/cache-helper.service';
 import NP from '../helpers/number-helper';
-
+import { ChangePasswordDto, LoginDto } from './dto';
+import { JsonValue } from '@prisma/client/runtime/library';
 /**
  * 认证服务
  * 处理用户登录、登出、会话管理等认证相关功能
  */
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   /** 登录尝试过期时间（30分钟） */
   private readonly LOGIN_ATTEMPT_EXPIRE = 30 * 60;
   /** 最大登录尝试次数 */
   private readonly MAX_LOGIN_ATTEMPTS = 5;
   private redisClient: RedisClientType;
-
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -98,6 +103,12 @@ export class AuthService {
       },
       include: {
         role: true,
+        corp: {
+          select: {
+            id: true,
+            parentCorpId: true,
+          },
+        },
       },
     });
 
@@ -125,14 +136,17 @@ export class AuthService {
   }
 
   getTokenExpireTime(date?: Date) {
-    const app = this.configService.get('env.appInstance');
-    const jwtConfig = this.configService.get(`env.jwt.${app}`);
-    const expiresIn = jwtConfig?.signOptions?.expiresIn || '7d';
+    const app = this.configService.get<string>('env.appInstance');
+    const jwtConfig = this.configService.get<JwtModuleOptions>(
+      `env.jwt.${app}`,
+    );
+    const expiresIn = (jwtConfig?.signOptions?.expiresIn as string) || '7d';
 
+    const expiresInMs = ms(expiresIn as ms.StringValue);
     // 计算过期的时间戳（秒）
     const expiresAt = NP.plus(
       Math.floor((date?.getTime() || Date.now()) / 1000),
-      Math.floor(ms(expiresIn) / 1000),
+      Math.floor(NP.divide(expiresInMs, 1000)),
     );
     this.logger.log({ expiresAt }, '过期时间');
     return expiresAt;
@@ -145,60 +159,111 @@ export class AuthService {
    * @param context 请求上下文，包含IP和UserAgent
    * @returns 登录成功的响应，包含token等信息
    */
-  async signIn(
-    username: string,
-    pass: string,
-    context?: { ip: string; userAgent: string },
-  ) {
+  async signIn(payload: LoginDto, context: { ip: string; userAgent: string }) {
     try {
-      const account = await this.verifyAccount(username, pass);
-      const expiresAt = this.getTokenExpireTime();
-
-      const type = await this.configService.get('env.appInstance');
-      const payload = { id: account.id, key: 'AUTH', type };
-      const sessionKey = AuthHelper.sessionKey(payload);
-      const token = await this.jwtService.signAsync(payload);
-      
-      const sessionParam = {
-        id: account.id,
-        type,
-        role: account.role?.perm,
-        username: account.username,
-        corpId: account.corpId,
-        lastLoginTime: new Date().toISOString(),
-      };
-
-      // 使用 SET with EXAT 选项，一个原子操作完成设置值和过期时间
-      await this.redisClient.set(sessionKey, JSON.stringify(sessionParam), {
-        EXAT: expiresAt
-      });
-
-      this.logger.log(
-        {
-          username,
-          accountId: account.id,
-          ip: context?.ip,
-          userAgent: context?.userAgent,
-        },
-        '用户登录成功',
+      const account = await this.verifyAccount(
+        payload.username,
+        payload.password,
       );
 
-      return {
-        id: account.id,
-        role: account.role?.perm ? [account.role.perm] : [],
-        token,
-      };
-    } catch (error) {
+      return await this.prisma.$transaction(async (tx: PrismaService) => {
+        // 记录登录日志
+        const loginLog = await tx.loginLog.create({
+          data: {
+            accountId: account.id,
+            username: account.username,
+            ip: context.ip,
+            userAgent: context.userAgent,
+            status: 'SUCCESS',
+            ...(payload.extra
+              ? { extra: payload.extra as unknown as JsonValue }
+              : {}),
+          },
+        });
+        const expiresAt = this.getTokenExpireTime();
+        const fingerprint = loginLog.id;
+
+        const type = this.configService.get<AppInstanceEnum>('env.appInstance');
+        const signPayload = {
+          id: account.id,
+          key: AuthSessionKeyEnum.AUTH,
+          type,
+          fingerprint,
+        };
+        const sessionKey = AuthHelper.sessionKey(signPayload);
+        const token = await this.jwtService.signAsync(signPayload);
+
+        const sessionParam = {
+          id: account.id,
+          type,
+          role: account.role?.perm,
+          corpId: account.corpId,
+          username: account.username,
+          lastLoginTime: new Date().toISOString(),
+          fingerprint,
+          isTopCorp: !account.corp?.parentCorpId,
+        };
+
+        // 使用 SET with EXAT 选项，一个原子操作完成设置值和过期时间
+        await this.redisClient.set(sessionKey, JSON.stringify(sessionParam), {
+          EXAT: expiresAt,
+        });
+
+        this.logger.log(
+          {
+            username: payload.username,
+            accountId: account.id,
+            ip: context.ip,
+            userAgent: context.userAgent,
+          },
+          '用户登录成功',
+        );
+
+        return {
+          id: account.id,
+          role: account.role?.perm ? [account.role.perm] : [],
+          token,
+        };
+      });
+    } catch (error: unknown) {
       this.logger.error(
         {
-          username,
-          ip: context?.ip,
-          userAgent: context?.userAgent,
+          username: payload.username,
+          ip: context.ip,
+          userAgent: context.userAgent,
           error,
         },
         '用户登录失败',
       );
       throw error;
+    }
+  }
+
+  async signOutAll(
+    payload: Pick<AuthSession, 'id' | 'username' | 'type'>,
+    context: { ip: string; userAgent: string },
+  ) {
+    try {
+      const sessionKeyParam = {
+        id: payload.id,
+        key: AuthSessionKeyEnum.AUTH,
+        type: payload.type,
+      };
+
+      await this.prisma.loginLog.create({
+        data: {
+          accountId: payload.id,
+          username: payload.username,
+          ip: context.ip,
+          userAgent: context.userAgent,
+          status: 'LOGOUT_ALL',
+        },
+      });
+      const sessionKey = AuthHelper.sessionKey(sessionKeyParam);
+      const keys = await this.redisClient.keys(`${sessionKey}:*`);
+      await this.redisClient.del(keys);
+    } catch (error: unknown) {
+      this.logger.error(error, '登出所有失败');
     }
   }
 
@@ -215,10 +280,22 @@ export class AuthService {
     try {
       const sessionKeyParam = {
         id: payload.id,
-        key: 'AUTH',
+        key: AuthSessionKeyEnum.AUTH,
         type: payload.type,
+        ...(payload.fingerprint ? { fingerprint: payload.fingerprint } : {}),
       };
       const sessionKey = AuthHelper.sessionKey(sessionKeyParam);
+
+      // 记录登出日志
+      await this.prisma.loginLog.create({
+        data: {
+          accountId: payload.id,
+          username: payload.username,
+          ip: context.ip,
+          userAgent: context.userAgent,
+          status: 'LOGOUT',
+        },
+      });
 
       await this.redisClient.del(sessionKey);
       this.logger.log(
@@ -231,7 +308,7 @@ export class AuthService {
       );
 
       return { success: true, message: '登出成功' };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(
         {
           accountId: payload.id,
@@ -252,21 +329,80 @@ export class AuthService {
    * @throws UnauthorizedException 当会话无效时
    */
   async validateUser(payload: AuthSessionKey) {
-    try {
-      const sessionKey = AuthHelper.sessionKey(payload);
+    const sessionKey = AuthHelper.sessionKey(payload);
 
-      const sessionStr = await this.redisClient.get(sessionKey);
+    const sessionStr = await this.redisClient.get(sessionKey);
 
-      if (!sessionStr) {
-        this.logger.warn({
+    if (!sessionStr) {
+      this.logger.warn(
+        {
           sessionKey,
-        }, 'AuthService validateUser - No session found');
-        throw new UnauthorizedException('Session not found');
+        },
+        'AuthService validateUser - No session found',
+      );
+      throw new UnauthorizedException('Session invalid, please login again');
+    }
+
+    const session = JSON.parse(sessionStr) as AuthSession;
+    return session;
+  }
+
+  /**
+   * 修改用户密码
+   * @param accountId 用户ID
+   * @param oldPassword 旧密码
+   * @param newPassword 新密码
+   * @returns 修改结果
+   */
+  async changePassword(
+    user: AuthSession,
+    payload: ChangePasswordDto,
+    context: { ip: string; userAgent: string },
+  ) {
+    try {
+      // 获取用户账号信息
+      const account = await this.prisma.account.findUnique({
+        where: { id: user.id },
+      });
+
+      if (!account) {
+        throw new UnauthorizedException('用户不存在');
       }
 
-      const session = JSON.parse(sessionStr) as AuthSession;
-      return session;
-    } catch (error) {
+      // 验证旧密码
+      if (!(await argon2.verify(account.password, payload.oldPassword))) {
+        this.logger.warn({ accountId: user.id }, '旧密码验证失败');
+        throw new UnauthorizedException('旧密码错误');
+      }
+
+      // 生成新密码的哈希值
+      const hashedPassword = await argon2.hash(payload.newPassword);
+
+      // 更新密码
+      await this.prisma.account.update({
+        where: { id: user.id },
+        data: { password: hashedPassword },
+      });
+
+      this.logger.log({ accountId: user.id }, '密码修改成功');
+
+      await this.signOutAll(user, {
+        ip: context.ip,
+        userAgent: context.userAgent,
+      });
+
+      return {
+        success: true,
+        message: '密码修改成功',
+      };
+    } catch (error: unknown) {
+      this.logger.error(
+        {
+          accountId: user.id,
+          error,
+        },
+        '修改密码失败',
+      );
       throw error;
     }
   }

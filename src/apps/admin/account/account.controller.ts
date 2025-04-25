@@ -1,12 +1,38 @@
-import { Controller, Get, Param, Post, Put, Delete, Body, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Query,
+  ForbiddenException,
+  Req,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { Request } from 'express';
 
 import { CurrentUser } from 'src/common/helpers/current-user';
 import { AuthSession } from 'src/types/auth';
+import { ForbiddenDemo } from 'src/common/decorators/forbidden-demo.decorator';
+import { AuthHelper } from 'src/common/helpers/auth-helper';
 
 import { AccountService } from './account.service';
-import { CreateAccountDto, UpdateAccountDto, AccountQuery, ResetPasswordDto } from './dto';
-import { ForbiddenDemo } from 'src/common/decorators/forbidden-demo.decorator';
+import {
+  CreateAccountDto,
+  UpdateAccountDto,
+  AccountQuery,
+  ResetPasswordDto,
+} from './dto';
 
 @ForbiddenDemo()
 @ApiTags('账号')
@@ -63,7 +89,7 @@ export class AccountController {
   async permCodeByRole(@Param('roleId') roleId: string) {
     return this.service.getPermCodeByRole(roleId);
   }
-  
+
   @Post()
   @ApiOperation({ summary: '创建账户' })
   @ApiBody({ type: CreateAccountDto })
@@ -135,7 +161,13 @@ export class AccountController {
     @CurrentUser() user: AuthSession,
     @Param('id') id: string,
     @Body() payload: ResetPasswordDto,
+    @Req() req: Request,
   ) {
-    return this.service.resetPassword(id, payload);
+    if (!AuthHelper.isAdmin(user) && !AuthHelper.isSuper(user)) {
+      throw new ForbiddenException('无权限操作');
+    }
+    const ip = req.ip || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    return this.service.resetPassword(id, payload, { ip, userAgent });
   }
 }

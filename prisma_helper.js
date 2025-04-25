@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -103,7 +101,8 @@ function getAllEnvironments() {
 }
 
 const environment = process.argv[2];
-const syncCommand = 'npx prisma format --schema .\\prisma\\ && npx prisma db push --schema .\\prisma\\';
+const prismaSchemaPath = path.join(__dirname, 'prisma');
+const syncCommand = `npx prisma format --schema ${prismaSchemaPath} && npx prisma db push --schema ${prismaSchemaPath}`;
 
 if (environment === 'all') {
   const environments = getAllEnvironments();
