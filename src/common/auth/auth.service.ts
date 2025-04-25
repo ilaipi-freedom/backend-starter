@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { JwtModuleOptions, JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
@@ -12,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { AvailableStatus } from '@prisma/client';
 import * as ms from 'ms';
 import { RedisClientType } from '@redis/client';
-
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { AppInstanceEnum } from 'src/types/helper';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -32,7 +27,6 @@ import { JsonValue } from '@prisma/client/runtime/library';
  */
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   /** 登录尝试过期时间（30分钟） */
   private readonly LOGIN_ATTEMPT_EXPIRE = 30 * 60;
   /** 最大登录尝试次数 */
@@ -45,6 +39,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly cacheHelper: CacheHelperService,
+    @InjectPinoLogger(AuthService.name)
+    private readonly logger: PinoLogger,
   ) {
     this.redisClient = this.cacheHelper.getRedisClient();
   }
@@ -150,7 +146,7 @@ export class AuthService {
       Math.floor((date?.getTime() || Date.now()) / 1000),
       Math.floor(NP.divide(expiresInMs, 1000)),
     );
-    this.logger.log({ expiresAt }, '过期时间');
+    this.logger.info({ expiresAt }, '过期时间');
     return expiresAt;
   }
 
@@ -211,7 +207,7 @@ export class AuthService {
           EXAT: expiresAt,
         });
 
-        this.logger.log(
+        this.logger.info(
           {
             username: payload.username,
             accountId: account.id,
@@ -300,7 +296,7 @@ export class AuthService {
       });
 
       await this.redisClient.del(sessionKey);
-      this.logger.log(
+      this.logger.info(
         {
           accountId: payload.id,
           ip: context?.ip,
@@ -386,7 +382,7 @@ export class AuthService {
         data: { password: hashedPassword },
       });
 
-      this.logger.log({ accountId: user.id }, '密码修改成功');
+      this.logger.info({ accountId: user.id }, '密码修改成功');
 
       await this.signOutAll(user, {
         ip: context.ip,

@@ -1,41 +1,47 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { RedisClientType } from '@redis/client';
 import { Keyv } from '@keyv/redis';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 import { KEYV_GLOBAL_KEY } from 'src/types/global';
 
 @Injectable()
 export class CacheHelperService implements OnModuleInit {
-  private readonly logger = new Logger(CacheHelperService.name);
   private redisClient: RedisClientType;
 
   constructor(
     @Inject(KEYV_GLOBAL_KEY) private readonly keyv: Keyv,
+    @InjectPinoLogger(CacheHelperService.name)
+    private readonly logger: PinoLogger,
   ) {}
 
-  async onModuleInit() {
+  onModuleInit() {
     try {
       this.redisClient = this.getRedisClient();
       this.setupRedisEventListeners();
       // 不等待连接验证，让它异步进行
-      this.validateRedisConnection().catch(err => {
-        this.logger.warn('Initial Redis connection check failed, but service will continue:', err.message);
+      this.validateRedisConnection().catch((err: unknown) => {
+        this.logger.warn(
+          { err },
+          'Initial Redis connection check failed, but service will continue',
+        );
       });
-    } catch (error) {
+    } catch (error: unknown) {
       // 记录错误但不中断启动
-      this.logger.warn('Redis client initialization warning:', error.message);
+      this.logger.warn({ error }, 'Redis client initialization warning');
     }
   }
 
   getRedisClient(): RedisClientType {
     try {
-      const client = this.keyv.store.client;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const client = this.keyv.store.client as RedisClientType;
       if (!client) {
         throw new Error('Redis client is not initialized');
       }
       return client;
-    } catch (error) {
-      this.logger.warn('Getting Redis client warning:', error.message);
+    } catch (error: unknown) {
+      this.logger.warn({ error }, 'Getting Redis client warning');
       throw error;
     }
   }
@@ -46,16 +52,16 @@ export class CacheHelperService implements OnModuleInit {
       return;
     }
 
-    this.redisClient.on('error', (err) => {
-      this.logger.warn('Redis client error (non-fatal):', err.message);
+    this.redisClient.on('error', (err: unknown) => {
+      this.logger.warn({ err }, 'Redis client error (non-fatal)');
     });
 
     this.redisClient.on('connect', () => {
-      this.logger.log('Redis client connected');
+      this.logger.info('Redis client connected');
     });
 
     this.redisClient.on('reconnecting', () => {
-      this.logger.log('Redis client reconnecting...');
+      this.logger.info('Redis client reconnecting...');
     });
 
     this.redisClient.on('end', () => {
@@ -66,10 +72,10 @@ export class CacheHelperService implements OnModuleInit {
   private async validateRedisConnection() {
     try {
       await this.redisClient.ping();
-      this.logger.log('Redis connection validated successfully');
+      this.logger.info('Redis connection validated successfully');
       return true;
-    } catch (error) {
-      this.logger.warn('Redis connection validation warning:', error.message);
+    } catch (error: unknown) {
+      this.logger.warn({ error }, 'Redis connection validation warning');
       return false;
     }
   }
@@ -78,8 +84,8 @@ export class CacheHelperService implements OnModuleInit {
     try {
       await this.redisClient.ping();
       return true;
-    } catch (error) {
-      this.logger.warn('Redis health check warning:', error.message);
+    } catch (error: unknown) {
+      this.logger.warn({ error }, 'Redis health check warning');
       return false;
     }
   }
