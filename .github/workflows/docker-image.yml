@@ -48,8 +48,8 @@ jobs:
           echo -n "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin ${{ secrets.DOCKER_REGISTRY }}
           docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_HUB_SPACE }}/${{ vars.DOCKER_IMAGE_NAME }}
 
-          cd /home/billy/freedom
+          cd ~/deploy/starter
           docker compose up -d
 
-          docker compose down pve202-nginx
-          docker compose up -d pve202-nginx
+          cd ~/deploy/nginx
+          docker compose exec global-nginx nginx -s reload
