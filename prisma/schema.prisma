@@ -47,18 +47,22 @@ model Dept {
 
 /// 用户角色
 model Role {
-  id             String           @id @default(cuid())
-  corpId         String
-  name           String // 角色名称
-  perm           String           @unique() // 权限字符 唯一
-  route          String? // 默认路由
-  status         AvailableStatus  @default(normal)
-  remark         String?          @db.Text
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @default(now()) @updatedAt
-  accounts       Account[]
-  corp           Corporation      @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  id        String          @id @default(cuid())
+  corpId    String
+  name      String // 角色名称
+  perm      String
+  route     String? // 默认路由
+  status    AvailableStatus @default(normal)
+  remark    String?         @db.Text
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+
+  corp Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+
   menuConfigList RoleMenuConfig[]
+  accounts       Account[]
+
+  @@unique([corpId, perm])
 }
 
 /// 用户
@@ -68,20 +72,24 @@ model Account {
   roleId    String
   status    AvailableStatus @default(normal)
   name      String
-  phone     String?         @unique
-  username  String          @unique
+  phone     String?
+  username  String
   password  String
   remark    String?         @db.Text
   createdAt DateTime        @default(now())
   updatedAt DateTime        @default(now()) @updatedAt
-  role      Role            @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  corp      Corporation     @relation(fields: [corpId], references: [id], onDelete: Cascade)
+
+  role Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  corp Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+
   loginLogs LoginLog[]
+
+  @@unique([corpId, username])
 }
 
 /// 菜单
 model SysMenu {
-  id           String      @id @default(cuid())
+  id           String          @id @default(cuid())
   type         SysMenuType
   name         String // 路由名称，必须设置且唯一
   parentMenuId String?
@@ -89,15 +97,16 @@ model SysMenu {
   path         String // URL 路径
   activePath   String? // 激活路径
   component    String? // 组件路径
-  permission   String      @unique // 权限标识，用于角色权限配置
+  permission   String          @unique // 权限标识，用于角色权限配置
+  status       AvailableStatus @default(normal)
+  remark       String?         @db.Text
 
-  status    AvailableStatus @default(normal)
-  remark    String?         @db.Text
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  parentMenu      SysMenu?         @relation("SysMenu_parent_SysMenu", fields: [parentMenuId], references: [id], onDelete: Cascade)
-  children        SysMenu[]        @relation("SysMenu_parent_SysMenu")
+  parentMenu SysMenu?  @relation("SysMenu_parent_SysMenu", fields: [parentMenuId], references: [id], onDelete: Cascade)
+  children   SysMenu[] @relation("SysMenu_parent_SysMenu")
+
   roleMenuConfigs RoleMenuConfig[]
 }
 
@@ -138,7 +147,7 @@ model SysDictData {
   sort      Float?
   key       String
   label     String
-  value     String          @db.LongText
+  value     String?         @db.LongText
   type      String
   remark    String?         @db.Text
   extra     Json? /// 扩展信息，对于有些数据，可以配置支持的扩展
