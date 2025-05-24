@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -15,10 +15,10 @@ import { CacheHelperModule } from '../cache-helper/cache-helper.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       global: true,
-      useFactory: async (service: ConfigService) => {
-        const app = await service.get('env.appInstance');
-        const secret = await service.get(`env.jwt.secret`);
-        const result = await service.get(`env.jwt.${app}`);
+      useFactory: (service: ConfigService) => {
+        const app = service.get<string>('env.appInstance');
+        const secret = service.get<string>(`env.jwt.secret`);
+        const result = service.get<JwtModuleOptions>(`env.jwt.${app}`);
         return {
           secret,
           ...(result.signOptions ? { signOptions: result.signOptions } : {}),

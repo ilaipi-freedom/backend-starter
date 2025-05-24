@@ -20,7 +20,7 @@ import { FORBIDDEN_DEMO_KEY } from '../decorators/forbidden-demo.decorator';
 export class DemoRoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const method = request.method;
     const user = request.user as AuthSession;
@@ -49,4 +49,4 @@ export class DemoRoleGuard implements CanActivate {
 
     return true;
   }
-} 
+}

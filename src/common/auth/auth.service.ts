@@ -9,9 +9,11 @@ import { JwtModuleOptions, JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
-import { AvailableStatus } from '@prisma/client';
 import * as ms from 'ms';
 import { RedisClientType } from '@redis/client';
+import { JsonValue } from '@prisma/client/runtime/library';
+
+import { AvailableStatus } from 'src/generated/prisma/client';
 import { AppInstanceEnum } from 'src/types/helper';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,7 +26,7 @@ import {
 import { CacheHelperService } from '../cache-helper/cache-helper.service';
 import NP from '../helpers/number-helper';
 import { ChangePasswordDto, LoginDto } from './dto';
-import { JsonValue } from '@prisma/client/runtime/library';
+
 /**
  * 认证服务
  * 处理用户登录、登出、会话管理等认证相关功能

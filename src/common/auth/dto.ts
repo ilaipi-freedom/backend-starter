@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class AdminLoginExtraDto {
+export class LoginExtraDto {
   @ApiPropertyOptional({
     description: '屏幕分辨率  window.screen.width',
     example: '123456',
@@ -53,7 +53,7 @@ export class LoginDto {
     description: '额外信息',
     example: '123456',
   })
-  extra?: AdminLoginExtraDto;
+  extra?: LoginExtraDto;
 }
 
 export class LoginResponseDto {

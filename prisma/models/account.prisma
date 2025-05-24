@@ -1,0 +1,93 @@
+/// 企业
+model Corporation {
+  id           String          @id @default(cuid())
+  name         String          @unique
+  parentCorpId String?
+  remark       String?         @db.Text
+  status       AvailableStatus @default(normal)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  parentCorp Corporation?  @relation("Corporation_parent_Corporation", fields: [parentCorpId], references: [id], onDelete: Cascade)
+  children   Corporation[] @relation("Corporation_parent_Corporation")
+
+  roles           Role[]
+  accounts        Account[]
+  sysDicts        SysDict[]
+  sysDictDataList SysDictData[]
+  depts           Dept[]
+}
+
+model Dept {
+  id           String          @id @default(cuid())
+  corpId       String
+  name         String
+  parentDeptId String?
+  remark       String?         @db.Text
+  status       AvailableStatus @default(normal)
+  sort         Float?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @default(now()) @updatedAt
+
+  parentDept Dept?       @relation("Dept_parent_Dept", fields: [parentDeptId], references: [id], onDelete: Cascade)
+  children   Dept[]      @relation("Dept_parent_Dept")
+  corp       Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+}
+
+/// 用户角色
+model Role {
+  id        String          @id @default(cuid())
+  corpId    String
+  name      String // 角色名称
+  perm      String
+  route     String? // 默认路由
+  status    AvailableStatus @default(normal)
+  remark    String?         @db.Text
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+
+  corp Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+
+  menuConfigList RoleMenuConfig[]
+  accounts       Account[]
+
+  @@unique([corpId, perm])
+}
+
+/// 用户
+model Account {
+  id        String          @id @default(cuid())
+  corpId    String
+  roleId    String
+  status    AvailableStatus @default(normal)
+  name      String
+  phone     String?
+  username  String
+  password  String
+  remark    String?         @db.Text
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+
+  role Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  corp Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+
+  loginLogs LoginLog[]
+
+  @@unique([corpId, username])
+}
+
+/// 登录日志
+model LoginLog {
+  id        String   @id @default(cuid())
+  accountId String
+  username  String
+  ip        String?
+  userAgent String?  @db.Text
+  status    String   @default("SUCCESS") // SUCCESS, FAILED, LOGOUT, LOGOUT_ALL
+  extra     Json? // 更多信息
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}

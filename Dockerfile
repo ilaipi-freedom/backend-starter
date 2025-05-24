@@ -31,7 +31,7 @@ FROM base AS release
 COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN echo "Asia/Shanghai" > /etc/timezone
 COPY --from=prod /app/node_modules /app/node_modules/
-COPY --from=build /app/node_modules/.prisma/ /app/node_modules/.prisma/
+COPY --from=build /app/src/generated/prisma/ /app/dist/generated/prisma/
 COPY package.json ./
 COPY prisma ./prisma/
 COPY --from=build /app/dist_obfuscated /app/dist/

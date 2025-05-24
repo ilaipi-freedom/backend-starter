@@ -101,8 +101,7 @@ function getAllEnvironments() {
 }
 
 const environment = process.argv[2];
-const prismaSchemaPath = path.join(__dirname, 'prisma');
-const syncCommand = `npx prisma format --schema ${prismaSchemaPath} && npx prisma db push --schema ${prismaSchemaPath} && npx prisma generate --schema ${prismaSchemaPath}`;
+const syncCommand = `npx prisma format && npx prisma db push && npx prisma generate`;
 
 if (environment === 'all') {
   const environments = getAllEnvironments();
