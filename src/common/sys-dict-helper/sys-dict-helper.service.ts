@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { AvailableStatus, Prisma, SysDictData } from '@prisma/client';
 import { keyBy, map, uniq } from 'lodash';
+
+import {
+  AvailableStatus,
+  Prisma,
+  SysDictData,
+} from 'src/generated/prisma/client';
 
 import { pageOptions } from '../helpers/page-helper';
 import { PrismaService } from '../prisma/prisma.service';

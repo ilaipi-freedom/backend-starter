@@ -107,7 +107,8 @@
     "testEnvironment": "node"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "schema": "./prisma"
   },
   "engines": {
     "node": ">=22.14.0"

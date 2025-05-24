@@ -1,0 +1,71 @@
+/// 菜单
+model SysMenu {
+  id           String          @id @default(cuid())
+  type         SysMenuType
+  name         String // 路由名称，必须设置且唯一
+  parentMenuId String?
+  meta         Json? // 元数据，包含 title、icon、activeIcon、badgeType、badge、badgeVariants、keepAlive、hideInMenu、hideChildrenInMenu、hideInBreadcrumb、hideInTab、affixTab、link、order 等信息
+  path         String // URL 路径
+  activePath   String? // 激活路径
+  component    String? // 组件路径
+  permission   String          @unique // 权限标识，用于角色权限配置
+  status       AvailableStatus @default(normal)
+  remark       String?         @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  parentMenu SysMenu?  @relation("SysMenu_parent_SysMenu", fields: [parentMenuId], references: [id], onDelete: Cascade)
+  children   SysMenu[] @relation("SysMenu_parent_SysMenu")
+
+  roleMenuConfigs RoleMenuConfig[]
+}
+
+/// 角色菜单配置
+model RoleMenuConfig {
+  id          String   @id @default(cuid())
+  roleId      String
+  sysMenuPerm String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  role    Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  sysMenu SysMenu @relation(fields: [sysMenuPerm], references: [permission], onDelete: Cascade)
+}
+
+/// 系统字典
+model SysDict {
+  id        String          @id @default(cuid())
+  corpId    String
+  category  SysDictCategory @default(select)
+  name      String
+  type      String
+  remark    String?         @db.Text
+  status    AvailableStatus @default(normal) /// 当前状态
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+
+  corp         Corporation   @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  dictDataList SysDictData[]
+
+  @@unique([corpId, type])
+}
+
+/// 系统字典数据
+model SysDictData {
+  id        String          @id @default(cuid())
+  corpId    String
+  sort      Float?
+  key       String
+  label     String
+  value     String?         @db.LongText
+  type      String
+  remark    String?         @db.Text
+  extra     Json? /// 扩展信息，对于有些数据，可以配置支持的扩展
+  status    AvailableStatus @default(normal) /// 当前状态
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+
+  corp    Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
+  sysDict SysDict     @relation(fields: [corpId, type], references: [corpId, type], onDelete: Cascade)
+}

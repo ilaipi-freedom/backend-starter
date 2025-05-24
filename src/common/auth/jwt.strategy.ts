@@ -34,11 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * @throws UnauthorizedException 当会话无效时
    */
   async validate(payload: AuthSessionKey) {
-    try {
-      const session = await this.authService.validateUser(payload);
-      return session;
-    } catch (error) {
-      throw error;
-    }
+    const session = await this.authService.validateUser(payload);
+    return session;
   }
 }
