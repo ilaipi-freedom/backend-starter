@@ -6,7 +6,7 @@ import { DemoRoleGuard } from 'src/common/auth/demo-role.guard';
 import { AuthModule } from 'src/common/auth/auth.module';
 import { CacheHelperModule } from 'src/common/cache-helper/cache-helper.module';
 import { GlobalHelperModule } from 'src/common/global-helper/global-helper.module';
-import { HttpExceptionFilter } from 'src/common/helpers/http-exception.filter';
+import { HttpExceptionFilter } from 'src/common/interceptor/http-exception.filter';
 
 import { AccountModule } from './account/account.module';
 import { DeptModule } from './dept/dept.module';
