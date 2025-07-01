@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Dept } from '@prisma/client';
+import { Dept } from 'src/generated/prisma';
 
 import { fmtBy } from 'src/common/helpers/date-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
@@ -81,7 +81,7 @@ export class DeptService {
     const resultDepts = [
       ...matchedDepts,
       ...Array.from(parentDeptIds)
-        .map((id) => deptMap.get(id)!)
+        .map((id) => deptMap.get(id))
         .filter((dept) => !matchedDeptIds.has(dept.id)),
     ];
 
@@ -104,7 +104,7 @@ export class DeptService {
       },
     });
     const tree = this.buildDeptTree(depts);
-    console.log(tree);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return tree;
   }
 

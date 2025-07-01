@@ -8,12 +8,10 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { AvailableStatus, Prisma } from '@prisma/client';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiBody,
-  ApiQuery,
   ApiParam,
   ApiOperation,
   ApiResponse,
@@ -68,10 +66,7 @@ export class RoleController {
     status: 200,
     description: '角色更新成功',
   })
-  async updateRole(
-    @Param('id') id: string,
-    @Body() payload: CreateRoleDto,
-  ) {
+  async updateRole(@Param('id') id: string, @Body() payload: CreateRoleDto) {
     return this.roleService.update(id, payload);
   }
 

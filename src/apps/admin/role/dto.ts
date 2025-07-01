@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AvailableStatus } from '@prisma/client';
 
+import { AvailableStatus } from 'src/generated/prisma';
 import { BaseQuery } from 'src/types/BaseQuery';
 
 export class RoleListQueryDto extends BaseQuery {
@@ -16,7 +16,6 @@ export class RoleListQueryDto extends BaseQuery {
     example: AvailableStatus.normal,
   })
   status: AvailableStatus;
-
 }
 
 export class CreateRoleDto {

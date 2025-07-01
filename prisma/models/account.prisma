@@ -63,7 +63,7 @@ model Account {
   status    AvailableStatus @default(normal)
   name      String
   phone     String?
-  username  String
+  username  String          @unique
   password  String
   remark    String?         @db.Text
   createdAt DateTime        @default(now())
@@ -73,8 +73,6 @@ model Account {
   corp Corporation @relation(fields: [corpId], references: [id], onDelete: Cascade)
 
   loginLogs LoginLog[]
-
-  @@unique([corpId, username])
 }
 
 /// 登录日志

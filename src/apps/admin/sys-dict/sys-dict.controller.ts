@@ -8,7 +8,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -19,10 +18,12 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 
-import { CreateSysDictDto, SysDictQuery } from './dto';
-import { SysDictService } from './sys-dict.service';
 import { CurrentUser } from 'src/common/helpers/current-user';
 import { AuthSession } from 'src/types/auth';
+import { Prisma } from 'src/generated/prisma';
+
+import { CreateSysDictDto, SysDictQuery } from './dto';
+import { SysDictService } from './sys-dict.service';
 
 @ApiTags('字典类型')
 @ApiBearerAuth()

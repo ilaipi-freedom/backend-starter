@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, Role } from '@prisma/client';
 
+import { Prisma, Role } from 'src/generated/prisma';
 import { fmtBy } from 'src/common/helpers/date-helper';
 import { pageOptions } from 'src/common/helpers/page-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
@@ -38,10 +38,7 @@ export class RoleService {
       data,
     });
   }
-  async list(
-    user: AuthSession,
-    query: RoleListQueryDto,
-  ) {
+  async list(user: AuthSession, query: RoleListQueryDto) {
     const where: Prisma.RoleWhereInput = {
       corpId: user.corpId,
     };

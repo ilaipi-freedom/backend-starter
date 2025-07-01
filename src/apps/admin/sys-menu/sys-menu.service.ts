@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { AvailableStatus, SysMenu, SysMenuType } from '@prisma/client';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { AvailableStatus, SysMenu, SysMenuType } from 'src/generated/prisma';
 
 import { CreateMenuDto, MenuMetaDto } from './dto';
 
