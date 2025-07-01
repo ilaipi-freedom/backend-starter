@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { JwtAuthGuard } from 'src/common/auth/auth.guard';
 import { DemoRoleGuard } from 'src/common/auth/demo-role.guard';
@@ -7,6 +7,7 @@ import { AuthModule } from 'src/common/auth/auth.module';
 import { CacheHelperModule } from 'src/common/cache-helper/cache-helper.module';
 import { GlobalHelperModule } from 'src/common/global-helper/global-helper.module';
 import { HttpExceptionFilter } from 'src/common/interceptor/http-exception.filter';
+import { TransformInterceptor } from 'src/common/interceptor/transform.interceptor';
 
 import { AccountModule } from './account/account.module';
 import { DeptModule } from './dept/dept.module';
@@ -39,6 +40,10 @@ import { SysDictDataModule } from './sys-dict-data/sys-dict-data.module';
     {
       provide: APP_GUARD,
       useClass: DemoRoleGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
     },
   ],
 })
