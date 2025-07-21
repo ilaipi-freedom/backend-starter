@@ -25,6 +25,10 @@ npx prisma db push // 根据 schema.prisma 自动生成数据库表
 npx nest start --watch
 ```
 
+### 初始化数据
+
+执行 `backend_starter_init.sql`， 登录用户名： `test` ， 密码： `123456`
+
 ## production
 
 ```bash
