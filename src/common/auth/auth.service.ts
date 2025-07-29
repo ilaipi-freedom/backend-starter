@@ -11,9 +11,14 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import * as ms from 'ms';
 import { RedisClientType } from '@redis/client';
-import { JsonValue } from '@prisma/client/runtime/library';
 
-import { AvailableStatus } from 'src/generated/prisma/client';
+import {
+  Account,
+  AvailableStatus,
+  Corporation,
+  Role,
+  Prisma,
+} from 'src/generated/prisma/client';
 import { AppInstanceEnum } from 'src/types/helper';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -163,10 +168,10 @@ export class AuthService {
    */
   async signIn(payload: LoginDto, context: { ip: string; userAgent: string }) {
     try {
-      const account = await this.verifyAccount(
-        payload.username,
-        payload.password,
-      );
+      const account: Account & {
+        role: Role;
+        corp: Pick<Corporation, 'id' | 'parentCorpId'>;
+      } = await this.verifyAccount(payload.username, payload.password);
 
       return await this.prisma.$transaction(async (tx: PrismaService) => {
         // 记录登录日志
@@ -178,7 +183,7 @@ export class AuthService {
             userAgent: context.userAgent,
             status: 'SUCCESS',
             ...(payload.extra
-              ? { extra: payload.extra as unknown as JsonValue }
+              ? { extra: payload.extra as unknown as Prisma.JsonValue }
               : {}),
           },
         });

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AvailableStatus, SysDictCategory } from '@prisma/client';
 
+import { AvailableStatus, SysDictCategory } from 'src/generated/prisma';
 import { BaseQuery } from 'src/types/BaseQuery';
 
 export class CreateSysDictDto {
