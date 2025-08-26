@@ -5,11 +5,15 @@ import {
   Logger,
 } from '@nestjs/common';
 
-import { PrismaClient } from 'src/generated/prisma/client';
+import { PrismaClient, Prisma } from 'src/generated/prisma/client';
+import { LogOptions } from 'src/generated/prisma/internal/class';
 
 @Injectable()
 export class PrismaService
-  extends PrismaClient
+  extends PrismaClient<
+    Prisma.PrismaClientOptions,
+    LogOptions<Prisma.PrismaClientOptions>
+  >
   implements OnModuleInit, OnModuleDestroy
 {
   private readonly logger = new Logger(PrismaService.name);
