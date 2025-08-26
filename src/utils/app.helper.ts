@@ -44,25 +44,26 @@ const serverBootstrap = async (mo: any) => {
 
   await app.listen(appPort);
   logger.log(`${appInstance} start at ${appPort}`);
+  return logger;
 };
 
 const cliBootstrap = async (mo: any, keepAlive = true) => {
   const app = await NestFactory.createApplicationContext(mo, {
     bufferLogs: true,
+    autoFlushLogs: true,
   });
-  await app.init();
-  const configService = app.get(ConfigService);
-  const appInstance = configService.get<string>('env.appInstance');
   const logger = app.get(Logger);
   app.useLogger(logger);
-  app.flushLogs();
+  const configService = app.get(ConfigService);
+  const appInstance = configService.get<string>('env.appInstance');
   if (!keepAlive) {
     logger.log(`${appInstance} app done`);
-    return;
+    return logger;
   }
   logger.log(`${appInstance} app start`);
   // keep alive
   createServer().listen();
+  return logger;
 };
 
 export { serverBootstrap, cliBootstrap };
