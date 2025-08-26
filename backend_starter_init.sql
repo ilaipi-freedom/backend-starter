@@ -1,11 +1,14 @@
 INSERT INTO Corporation (id, name, remark, status, createdAt, updatedAt) VALUES ('x184cu98uk1ecoxjm3qxpvd9', '企业名称', null, DEFAULT, DEFAULT, DEFAULT);
 
-INSERT INTO Role (id, corpId, name, perm, route, status, createdAt, updatedAt) VALUES ('ttapg9mbvzngkaly1va1i8qs', 'x184cu98uk1ecoxjm3qxpvd9', '管理员', 'super', null, DEFAULT, DEFAULT, DEFAULT);
-INSERT INTO Role (id, corpId, name, perm, route, status, createdAt, updatedAt) VALUES ('dheobkoxvl1lrh5kov3034ti', 'x184cu98uk1ecoxjm3qxpvd9', '普通用户', 'user', null, DEFAULT, DEFAULT, DEFAULT);
+INSERT INTO Role (id, corpId, name, perm, route, status, createdAt, updatedAt) VALUES ('ttapg9mbvzngkaly1va1i8qs', 'x184cu98uk1ecoxjm3qxpvd9', '管理员', 'super', '/workspace', DEFAULT, DEFAULT, DEFAULT);
+INSERT INTO Role (id, corpId, name, perm, route, status, createdAt, updatedAt) VALUES ('dheobkoxvl1lrh5kov3034ti', 'x184cu98uk1ecoxjm3qxpvd9', '普通用户', 'user', '/workspace', DEFAULT, DEFAULT, DEFAULT);
 
 INSERT INTO Account (id, corpId, roleId, status, name, phone, username, password, createdAt, updatedAt)
 VALUES ('u5mn5bw7crvsje4m8nhn9bd6', 'x184cu98uk1ecoxjm3qxpvd9', 'ttapg9mbvzngkaly1va1i8qs', DEFAULT, '管理员', 'test', 'test', '$argon2i$v=19$m=16,t=2,p=1$bFlIR2xQSWQzYzhVWHlIWA$JLon3d3kodeklkQ4Wn90RQ', DEFAULT, DEFAULT);
 
+set foreign_key_checks = 0;
+truncate table SysMenu;
+truncate table RoleMenuConfig;
 INSERT INTO SysMenu (id, name, permission, component, path, meta, parentMenuId, status, type, createdAt, updatedAt, remark, activePath) VALUES ('cm86olm1r0000f9ukbfg7rhlp', 'Workspace', 'dashboard', '/dashboard/workspace/index', '/workspace', '{"icon": "carbon:workspace", "order": 10, "title": "page.dashboard.workspace"}', null, 'normal', 'menu', '2025-03-13 01:39:44.992', '2025-03-16 01:10:06.264', null, null);
 INSERT INTO SysMenu (id, name, permission, component, path, meta, parentMenuId, status, type, createdAt, updatedAt, remark, activePath) VALUES ('cm86qpoj80000f9yc069kxl5p', 'System', 'system', null, '/system', '{"icon": "carbon:settings", "badge": "new", "order": 20, "title": "system.title", "badgeType": "normal", "badgeVariants": "primary"}', null, 'normal', 'catalog', '2025-03-13 02:38:54.068', '2025-03-16 01:10:12.818', null, null);
 INSERT INTO SysMenu (id, name, permission, component, path, meta, parentMenuId, status, type, createdAt, updatedAt, remark, activePath) VALUES ('cm86ugzd30000f9dsaxirggeu', 'SystemMenu', 'system:menu:list', '/system/menu/list', '/system/menu', '{"icon": "carbon:menu", "order": 30, "title": "system.menu.title", "hideInTab": false, "hideInMenu": false}', 'cm89ik0j30000f9wsl7xyui73', 'normal', 'menu', '2025-03-13 04:24:06.663', '2025-03-16 01:11:47.198', null, null);
@@ -31,3 +34,6 @@ INSERT INTO RoleMenuConfig (id, roleId, sysMenuPerm) VALUES ('cm89iwgci000lf9wst
 INSERT INTO RoleMenuConfig (id, roleId, sysMenuPerm) VALUES ('cm89iwgci000mf9wscyup9ca2', 'ttapg9mbvzngkaly1va1i8qs', 'system:menu:list');
 INSERT INTO RoleMenuConfig (id, roleId, sysMenuPerm) VALUES ('cm89iwgci000nf9ws8f0zrqxw', 'ttapg9mbvzngkaly1va1i8qs', 'system:permission:config');
 INSERT INTO RoleMenuConfig (id, roleId, sysMenuPerm) VALUES ('cm89iwgci000of9ws4wgjvus3', 'ttapg9mbvzngkaly1va1i8qs', 'system:role:list');
+
+set foreign_key_checks = 1;
+

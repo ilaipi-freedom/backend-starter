@@ -9,7 +9,7 @@ import { JwtModuleOptions, JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
-import * as ms from 'ms';
+import ms from 'ms';
 import { RedisClientType } from '@redis/client';
 
 import {
@@ -340,7 +340,7 @@ export class AuthService {
 
     const sessionStr = await this.redisClient.get(sessionKey);
 
-    if (!sessionStr) {
+    if (!sessionStr || typeof sessionStr !== 'string') {
       this.logger.warn(
         {
           sessionKey,
