@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { map } from 'lodash';
 import * as argon2 from 'argon2';
 
-import { Prisma, SysMenuType, RoleMenuConfig } from 'src/generated/prisma';
+import { Prisma, SysMenuType, RoleMenuConfig } from 'src/generated/prisma/client';
 import { pageOptions } from 'src/common/helpers/page-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { AuthSession } from 'src/types/auth';

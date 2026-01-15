@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Dept } from 'src/generated/prisma';
+import { Dept } from 'src/generated/prisma/client';
 
 import { fmtBy } from 'src/common/helpers/date-helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';

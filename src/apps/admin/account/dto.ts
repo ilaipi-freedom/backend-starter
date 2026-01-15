@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional, IsNotEmpty, IsEnum } from 'class-validator';
 
-import { AvailableStatus } from 'src/generated/prisma';
+import { AvailableStatus } from 'src/generated/prisma/client';
 
 import { BaseQuery } from 'src/types/BaseQuery';
 

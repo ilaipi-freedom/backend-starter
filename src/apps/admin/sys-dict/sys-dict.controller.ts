@@ -20,7 +20,7 @@ import {
 
 import { CurrentUser } from 'src/common/helpers/current-user';
 import { AuthSession } from 'src/types/auth';
-import { Prisma } from 'src/generated/prisma';
+import { Prisma } from 'src/generated/prisma/client';
 
 import { CreateSysDictDto, SysDictQuery } from './dto';
 import { SysDictService } from './sys-dict.service';

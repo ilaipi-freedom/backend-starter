@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional } from 'class-validator';
 
-import { SysMenuType } from 'src/generated/prisma';
+import { SysMenuType } from 'src/generated/prisma/client';
 
 export class MenuMetaDto {
   @ApiPropertyOptional({ description: '菜单名称' })
